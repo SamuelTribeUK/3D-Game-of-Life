@@ -1,11 +1,13 @@
 // This code is for the opening and closing of the settings panel on the left side of the webpage
-function openNav(e) {
+function openNav() {
 	document.getElementById("mySidepanel").style.width = "250px";
-	console.log(document.getElementById("mySidepanel").style.width);
+	document.getElementById("mySidepanel").style.paddingLeft = "20px";
+
 }
 
-function closeNav(e) {
+function closeNav() {
 	document.getElementById("mySidepanel").style.width = "0";
+	document.getElementById("mySidepanel").style.paddingLeft = "0";
 }
 
 window.onload = function(){

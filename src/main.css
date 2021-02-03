@@ -14,7 +14,7 @@ canvas {
 /* The side panel menu */
 .sidepanel {
     height: 100vh; /* Specify a height */
-    width: 0px; /* 0 width - change this with JavaScript */
+    width: 0; /* 0 width - change this with JavaScript */
     position: fixed; /* Stay in place */
     z-index: 1; /* Stay on top */
     top: 0;
@@ -43,7 +43,7 @@ canvas {
 .sidepanel .closebtn {
     position: absolute;
     top: 0;
-    right: 25px;
+    right: 10px;
     font-size: 36px;
     margin-left: 50px;
 }
