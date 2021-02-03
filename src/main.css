@@ -12,9 +12,9 @@ canvas {
 }
 
 /* The side panel menu */
-.sidepanel {
+.settingsPanel {
     height: 100vh; /* Specify a height */
-    width: 0px; /* 0 width - change this with JavaScript */
+    width: 0; /* 0 width - change this with JavaScript */
     position: fixed; /* Stay in place */
     z-index: 1; /* Stay on top */
     top: 0;
@@ -27,7 +27,7 @@ canvas {
     transition: 0.15s;
 }
 
-.sidepanel p, a, label {
+.settingsPanel p, a, label {
     text-decoration: none;
     font-size: 16px;
     font-family: "Cascadia Code", serif;
@@ -36,14 +36,14 @@ canvas {
 }
 
 /* The side panel text */
-.sidepanel p {
+.settingsPanel p {
     margin: 0 0;
 }
 
-.sidepanel .closebtn {
+.settingsPanel .closebtn {
     position: absolute;
     top: 0;
-    right: 25px;
+    right: 10px;
     font-size: 36px;
     margin-left: 50px;
 }

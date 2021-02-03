@@ -1,9 +1,18 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require("webpack");
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
 module.exports = {
 	mode: "development",
+	devServer: {
+		historyApiFallback: true,
+		contentBase: path.resolve(__dirname, './dist'),
+		open: true,
+		compress: true,
+		hot: true,
+		port: 8080,
+	},
 	entry: {
 		app: ['./src/index.js','./src/settingsPanel.js'],
 	},
@@ -20,11 +29,12 @@ module.exports = {
 		],
 	},
 	plugins: [
-			new HtmlWebpackPlugin({
-				title: '3D Game of Life - Samuel Tribe',
-				template: path.resolve(__dirname, './src/template.html'),
-				filename: 'index.html'
-			}),
-			new CleanWebpackPlugin(),
+		new HtmlWebpackPlugin({
+			title: 'live dev server',
+			template: path.resolve(__dirname, './src/template.html'),
+			filename: 'index.html'
+		}),
+		new CleanWebpackPlugin(),
+		new webpack.HotModuleReplacementPlugin(),
 	],
 };

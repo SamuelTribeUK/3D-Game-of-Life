@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Game Of Life - Samuel Tribe</title>
+	<title><%= htmlWebpackPlugin.options.title %></title>
 	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>
-<div id="mySidepanel" class="sidepanel">
+<div id="settingsPanel" class="settingsPanel">
 	<a id="closebtn" href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
 	<button class="stopStart" id="stopStart">Start</button>
 	<p id="status"></p>
@@ -38,6 +38,5 @@
 </div>
 <button id="openbtn" class="openbtn">&#9881; Settings</button>
 <canvas id="canvas"></canvas>
-<script src="../dist/bundle.js"></script>
 </body>
 </html>
