@@ -6,7 +6,7 @@ import {
 	PointLight,
 	MeshLambertMaterial,
 	Mesh,
-	Vector3, Raycaster, Vector2,
+	Raycaster, Vector2,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 // import $ from "jquery";
@@ -46,9 +46,13 @@ let mouse = new Vector2();
 /* TODO Develop the code to set up the canvas after the window has loaded, all code after this are functions used for
  *  the game of life */
 
+let existingOnload = window.onload;
 window.onload = function(){
+	// If a function is already assigned to window.onload then execute that first, then run code below
+	// This ensures no conflicts with settingsPanel onload function
+	if(typeof(existingOnload) == "function"){ existingOnload(); }
 
-	attachClickEvents();
+	// attachClickEvents();
 };
 
 
