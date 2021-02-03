@@ -1,0 +1,101 @@
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: "Cascadia Code", serif;
+    background: #1a2639;
+}
+
+canvas {
+    z-index: 0;
+    display: block;
+    float:right;
+}
+
+/* The side panel menu */
+.sidepanel {
+    height: 100vh; /* Specify a height */
+    width: 0px; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0;
+    left: 0;
+    background: linear-gradient(to top right, #8A261C, #B2482E);
+    box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 20px;
+    font-family: "Cascadia Code", serif;
+    transition: 0.15s;
+}
+
+.sidepanel p, a, label {
+    text-decoration: none;
+    font-size: 16px;
+    font-family: "Cascadia Code", serif;
+    color: #f0f0f0;
+    transition: 0.3s;
+}
+
+/* The side panel text */
+.sidepanel p {
+    margin: 0 0;
+}
+
+.sidepanel .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+.openbtn {
+    font-size: 20px;
+    cursor: pointer;
+    background-color: #111;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+}
+
+.openbtn:hover {
+    background-color: #444;
+}
+
+.orbitBox {
+    float: left;
+}
+
+.orbitToggle {
+    display: inline-block;
+}
+
+.inputField {
+    float: right;
+    margin-right: 20px;
+    height: 11px;
+}
+
+.inputLabel {
+    float: left;
+}
+
+.updateButton {
+    margin-right: 10px;
+    width: 230px;
+}
+
+.updateButton {
+    font-family: "Cascadia Code", serif;
+    margin-top: 5px;
+}
+
+input[type="number"] {
+    width: 50px;
+    font-family: "Cascadia Code", serif;
+}
+
+.stopStart {
+    font-family: "Cascadia Code", serif;
+
+    font-size: 25px;
+}
