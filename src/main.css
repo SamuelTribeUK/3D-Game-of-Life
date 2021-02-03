@@ -3,20 +3,21 @@ body {
     height: 100vh;
     font-family: "Cascadia Code", serif;
     background: #1a2639;
+    position: absolute; /* Stay in place */
+    overflow: hidden;
 }
 
 canvas {
     z-index: 0;
-    display: block;
-    float:right;
+    position: absolute; /* Stay in place */
 }
 
 /* The side panel menu */
 .settingsPanel {
     height: 100vh; /* Specify a height */
     width: 0; /* 0 width - change this with JavaScript */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Stay on top */
+    position: absolute; /* Stay in place */
+    z-index: 2; /* Stay on top */
     top: 0;
     left: 0;
     background: linear-gradient(to top right, #8A261C, #B2482E);
@@ -49,12 +50,17 @@ canvas {
 }
 
 .openbtn {
-    font-size: 20px;
+    font-size: 30px;
     cursor: pointer;
-    background-color: #111;
+    background: linear-gradient(to top right, #8A261C, #B2482E);
+    box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    position: absolute; /* Stay in place */
+    z-index: 1; /* Stay on top */
     color: white;
-    padding: 10px 15px;
-    border: none;
+    padding: 9px 16px;
+    margin-left: 15px;
+    margin-top: 15px;
+    border: 0;
 }
 
 .openbtn:hover {
