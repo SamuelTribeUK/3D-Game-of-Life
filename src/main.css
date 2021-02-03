@@ -12,7 +12,7 @@ canvas {
 }
 
 /* The side panel menu */
-.sidepanel {
+.settingsPanel {
     height: 100vh; /* Specify a height */
     width: 0; /* 0 width - change this with JavaScript */
     position: fixed; /* Stay in place */
@@ -27,7 +27,7 @@ canvas {
     transition: 0.15s;
 }
 
-.sidepanel p, a, label {
+.settingsPanel p, a, label {
     text-decoration: none;
     font-size: 16px;
     font-family: "Cascadia Code", serif;
@@ -36,11 +36,11 @@ canvas {
 }
 
 /* The side panel text */
-.sidepanel p {
+.settingsPanel p {
     margin: 0 0;
 }
 
-.sidepanel .closebtn {
+.settingsPanel .closebtn {
     position: absolute;
     top: 0;
     right: 10px;
