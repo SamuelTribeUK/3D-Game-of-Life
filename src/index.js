@@ -67,22 +67,31 @@ let simulateStep = function() {
 						}
 					}
 				}
+				// B3/S23 (Standard 2D GoL)
+				if ((liveNum === 3) && gameBoard[i][j][k].state === 0) {
+					changed = true;
+					newGameBoard[i][j][k].state = 1;
+				} else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
+					changed = true;
+					newGameBoard[i][j][k].state = 0;
+				}
+
 				// B45/S5
 				// if ((liveNum === 4 || liveNum === 5) && gameBoard[i][j][k].state === 0) {
 				// 	changed = true;
 				// 	newGameBoard[i][j][k].state = 1;
-				// } else if (!(liveNum === 5 && gameBoard[i][j][k].state === 1)) {
+				// } else if (!(liveNum === 5) && gameBoard[i][j][k].state === 1) {
 				// 	newGameBoard[i][j][k].state = 0;
 				// }
 
 				// B36/S23 (2D Highlife)
-				if ((liveNum === 3 || liveNum === 6) && gameBoard[i][j][k].state === 0) {
-					changed = true;
-					newGameBoard[i][j][k].state = 1;
-				} else if ((!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) && gameBoard[i][j][k].state === 1) {
-					changed - true;
-					newGameBoard[i][j][k].state = 0;
-				}
+				// if ((liveNum === 3 || liveNum === 6) && gameBoard[i][j][k].state === 0) {
+				// 	changed = true;
+				// 	newGameBoard[i][j][k].state = 1;
+				// } else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
+				// 	changed = true;
+				// 	newGameBoard[i][j][k].state = 0;
+				// }
 			}
 		}
 	}
