@@ -8,7 +8,7 @@ import {
 	AmbientLight,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-// import $ from "jquery";
+import $ from "jquery";
 // import Toastify from "toastify-js";
 import './main.css';
 import './settingsPanel.js';
@@ -18,8 +18,8 @@ import './settingsPanel.js';
 let xSize = 10;
 let ySize = 10;
 let zSize = 10;
-let timeout = 100;
-let orbitToggle = false;
+let timeout = 200;
+let orbitToggle = true;
 
 let gameBoard;
 
@@ -30,17 +30,103 @@ let backgroundColour = "#1a2639";
 let iterations = 0;
 let status="stopped";
 
+let interval;
+
 const canvas = document.querySelector('canvas');
 
 let scene = new Scene();
 let camera = new PerspectiveCamera(75, (window.innerWidth)/(window.innerHeight), 0.1, 1000);
 let renderer = new WebGLRenderer({antialias: true, canvas: canvas});
 let controls = new OrbitControls(camera, canvas);
-controls.enabled = false;
-let geometry = new BoxGeometry(0.9, 0.9, 0.9);
+// controls.enabled = true;
+let geometry = new BoxGeometry(0.5, 0.5, 0.5);
 let light = new AmbientLight(0xFFFFFF,1);
 
 // TODO all functions below at the moment are copied over from the 2d prototype code, adapt these for 3D
+
+/* simulateStep creates a deep copy of the game board to iterate over each cell and check for living neighbours to check
+ * against the rules of the Game of Life. The new game board is required so there aren't conflicts with changes. After
+ * the board has been checked, if no cells have changed then the game is stopped. The side bar and cube colours are then
+ * updated with their respective functions */
+let simulateStep = function() {
+	console.log("simulate step called");
+	let newGameBoard = $.extend(true, [], gameBoard);
+
+	let changed = false;
+
+	for (let i = 0; i < xSize; i++) {
+		for (let j = 0; j < ySize; j++) {
+			for (let k = 0; k < zSize; k++) {
+				let liveNum = 0;
+				for (let l = -1; l < 2; l++) {
+					for (let m = -1; m < 2; m++) {
+						for (let n = -1; n < 2; n++) {
+							if (!((l === 0) && (m === 0) && (n === 0))) {
+								liveNum += checkCell(i+l, j+m, k+n);
+							}
+						}
+					}
+				}
+				// B3/S23 (Standard 2D GoL)
+				if ((liveNum === 3) && gameBoard[i][j][k].state === 0) {
+					changed = true;
+					newGameBoard[i][j][k].state = 1;
+				} else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
+					changed = true;
+					newGameBoard[i][j][k].state = 0;
+				}
+
+				// B45/S5
+				// if ((liveNum === 4 || liveNum === 5) && gameBoard[i][j][k].state === 0) {
+				// 	changed = true;
+				// 	newGameBoard[i][j][k].state = 1;
+				// } else if (!(liveNum === 5) && gameBoard[i][j][k].state === 1) {
+				// 	newGameBoard[i][j][k].state = 0;
+				// }
+
+				// B36/S23 (2D Highlife)
+				// if ((liveNum === 3 || liveNum === 6) && gameBoard[i][j][k].state === 0) {
+				// 	changed = true;
+				// 	newGameBoard[i][j][k].state = 1;
+				// } else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
+				// 	changed = true;
+				// 	newGameBoard[i][j][k].state = 0;
+				// }
+			}
+		}
+	}
+	gameBoard = $.extend(true, [], newGameBoard);
+
+	iterations += 1;
+
+	if (!changed) {
+		clearInterval(interval);
+		document.getElementById("stopStart").innerText = "Start";
+		status = "stopped";
+		updateSidebar();
+	}
+
+	updateSidebar();
+	updateColours();
+
+	if (!(orbitToggle)) requestAnimationFrame(render);
+}
+
+/* checkCell takes an x, y and z value and checks the game board if the cell at that location is alive or dead and returns
+ * 1 if it is alive and 0 if dead. Out of bound cells are handled by returning 0 */
+let checkCell = function(currX, currY, currZ) {
+	if (currX < 0 || currX >= xSize) {
+		return 0;
+	} else if (currY < 0 || currY >= ySize) {
+		return 0;
+ 	} else if (currZ < 0 || currZ >= zSize) {
+		return 0;
+	} else if (gameBoard[currX][currY][currZ].state === 1) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
 
 /* The camera z location is the largest of the x and y sizes with the x and y values being the centre of the grid. The
  * background colour is set to white. The canvas size is set to the window inner sizes with the width - 250 to account
@@ -78,15 +164,15 @@ let initialiseBoard = function() {
 	}
 }
 
-// Add mesh cubes for each element in the 2D array game board, with green cubes being live cells and white being dead
+
 let addMesh = function(state, i, j, k) {
-	let colour;
+	let opacity = 1;
+	let colour = liveCellColour;
 	if (state === 0) {
+		opacity = 0.1;
 		colour = deadCellColour;
-	} else {
-		colour = liveCellColour;
 	}
-	let material = new MeshLambertMaterial({color: colour});
+	let material = new MeshLambertMaterial({color: colour, opacity: opacity, transparent: true});
 	let mesh = new Mesh(geometry, material);
 	mesh.position.set(i,j,k);
 	gameBoard[i][j][k] = {box: mesh, state: state};
@@ -123,6 +209,29 @@ let attachClickEvents = function() {
 	// document.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
+/* updateColours iterates over the game board and updates the colours of the cubes on the canvas to represent the living
+ * and dead cells with green and white respectively */
+let updateColours = function() {
+	let state;
+	let opacity = 1;
+	let colour = liveCellColour;
+	for (let i = 0; i < xSize; i++) {
+		for (let j = 0; j < ySize; j++) {
+			for (let k = 0; k < zSize; k++) {
+				state = gameBoard[i][j][k].state;
+				opacity = 1;
+				colour = liveCellColour;
+				if (state === 0) {
+					opacity = 0.1;
+					colour = deadCellColour;
+				}
+				gameBoard[i][j][k].box.material.opacity = (opacity);
+				gameBoard[i][j][k].box.material.color.set(colour);
+			}
+		}
+	}
+}
+
 // The game status and number of iterations on the side bar are updated using the updateSidebar function
 let updateSidebar = function() {
 	document.getElementById("status").innerText = "Status: " + status;
@@ -152,6 +261,9 @@ window.onload = function(){
 	if(typeof(existingOnload) == "function"){ existingOnload(); }
 
 	attachClickEvents();
+	interval = setInterval(simulateStep, timeout);
+	document.getElementById("stopStart").innerText = "Stop";
+	status = "playing";
 	updateSidebar();
 };
 
