@@ -99,12 +99,12 @@ let simulateStep = function() {
 
 	iterations += 1;
 
-	// if (!changed) {
-	// 	clearInterval(interval);
-	// 	document.getElementById("stopStart").innerText = "Start";
-	// 	status = "stopped";
-	// 	updateSidebar();
-	// }
+	if (!changed) {
+		clearInterval(interval);
+		document.getElementById("stopStart").innerText = "Start";
+		status = "stopped";
+		updateSidebar();
+	}
 
 	updateSidebar();
 	updateColours();
