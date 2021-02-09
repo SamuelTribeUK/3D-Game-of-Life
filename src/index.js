@@ -1,4 +1,13 @@
-import {AmbientLight, BoxGeometry, Mesh, MeshLambertMaterial, PerspectiveCamera, Scene, WebGLRenderer,} from "three";
+import {
+	AmbientLight,
+	BoxGeometry,
+	Mesh,
+	MeshLambertMaterial,
+	PerspectiveCamera,
+	Scene,
+	Vector3,
+	WebGLRenderer,
+} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 let $ = require('jquery/src/core');
 // import Toastify from "toastify-js";
@@ -12,6 +21,7 @@ let ySize = 10;
 let zSize = 10;
 let timeout = 200;
 let orbitToggle = true;
+let orbitCheckbox;
 let resizeTimer = false;
 
 let gameBoard;
@@ -175,12 +185,15 @@ let addMesh = function(state, i, j, k) {
 /* The functions that handle all buttons and inputs on the side panel are attached in this function, as well as the
  * resize event function and the arrow key camera controls. The input fields are populated with the start values */
 let attachClickEvents = function() {
-	// element.addEventListener("click", stopStart);
-	//
+	let element = document.getElementById('stopStart');
+	element.addEventListener("click", stopStart);
+
 	// element = document.querySelector("#submit");
 	// element.addEventListener("click", newGameBoard);
 
-	let element = document.getElementById("xSizeInput");
+	orbitCheckbox.addEventListener("change", toggleOrbitControls);
+
+	element = document.getElementById("xSizeInput");
 	element.value = xSize;
 
 	element = document.getElementById("ySizeInput");
@@ -198,8 +211,7 @@ let attachClickEvents = function() {
 		resizeTimer = setTimeout(resizeWindow, 300);
 	});
 
-	// document.addEventListener("keydown", arrowKeyCameraControls);
-	// document.addEventListener('mousedown', onDocumentMouseDown, false);
+	document.addEventListener("keydown", arrowKeyCameraControls);
 }
 
 // Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
@@ -208,6 +220,87 @@ let resizeWindow = function() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
+	requestAnimationFrame(render);
+}
+
+/* When the user clicks the stop/start button, this function handles the stopping and starting of the game using
+ * setInterval nad clearInterval, updating the sidebar and button text in the process */
+let stopStart = function() {
+	if (status === "stopped") {
+		interval = setInterval(simulateStep, timeout);
+		document.getElementById("stopStart").innerText = "Stop";
+		status = "playing";
+		updateSidebar();
+	} else {
+		clearInterval(interval);
+		document.getElementById("stopStart").innerText = "Start";
+		status = "stopped";
+		updateSidebar();
+	}
+	if (!(orbitToggle)) requestAnimationFrame(render);
+}
+
+/* The orbit controls can be disabled using this function. It sets controls.enabled and orbitToggle to false and adds
+ * arrow key event listeners for the standard camera controls */
+let disableOrbit = function() {
+	controls.enabled = false;
+	orbitToggle = false;
+	document.addEventListener("keydown", arrowKeyCameraControls);
+}
+
+/* toggleOrbitControls handles the orbit camera controls being enabled/disabled and configures the target of the camera.
+ * The arrow key event listeners for the standard camera controls are disabled when enabling orbit controls to avoid
+ * conflicts with the existing event listeners included with orbit controls */
+let toggleOrbitControls = function() {
+	if (orbitCheckbox.checked) {
+		// Enable orbit controls
+		document.removeEventListener("keydown", arrowKeyCameraControls);
+		controls.enabled = true;
+		controls.target = (new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0));
+		orbitToggle = true;
+		render();
+	} else {
+		// Disable orbit controls
+		disableOrbit();
+	}
+}
+
+/* arrowKeyCameraControls manages the camera location movement, requesting an animation frame after camera movement to
+ * render the changes on the canvas */
+let arrowKeyCameraControls = function(event) {
+	let direction = new Vector3;
+	camera.getWorldDirection(direction);
+
+	if (direction.z < 0) {
+		switch (event.key) {
+			case 'ArrowUp' || 'Up':
+				camera.position.y += 1;
+				break;
+			case 'ArrowLeft' || 'Left':
+				camera.position.x -= 1;
+				break;
+			case 'ArrowRight' || 'Right':
+				camera.position.x += 1;
+				break;
+			case 'ArrowDown' || 'Down':
+				camera.position.y -= 1;
+		}
+	} else {
+		switch (event.key) {
+			case 'ArrowUp' || 'Up':
+				camera.position.y += 1;
+				break;
+			case 'ArrowLeft' || 'Left':
+				camera.position.x += 1;
+				break;
+			case 'ArrowRight' || 'Right':
+				camera.position.x -= 1;
+				break;
+			case 'ArrowDown' || 'Down':
+				camera.position.y -= 1;
+		}
+	}
+
 	requestAnimationFrame(render);
 }
 
@@ -256,13 +349,16 @@ let render = function() {
 setupScene();
 initialiseBoard();
 
+
 let existingOnload = window.onload;
 window.onload = function(){
 	// If a function is already assigned to window.onload then execute that first, then run code below
 	// This ensures no conflicts with settingsPanel onload function
 	if(typeof(existingOnload) == "function"){ existingOnload(); }
-
+	orbitCheckbox = document.getElementById("orbitControls");
+	orbitCheckbox.checked = true;
 	attachClickEvents();
+
 	interval = setInterval(simulateStep, timeout);
 	document.getElementById("stopStart").innerText = "Stop";
 	status = "playing";
