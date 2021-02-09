@@ -1,14 +1,6 @@
-import {
-	Scene,
-	PerspectiveCamera,
-	WebGLRenderer,
-	BoxGeometry,
-	MeshLambertMaterial,
-	Mesh,
-	AmbientLight,
-} from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import $ from "jquery";
+import {AmbientLight, BoxGeometry, Mesh, MeshLambertMaterial, PerspectiveCamera, Scene, WebGLRenderer,} from "three";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+let $ = require('jquery/src/core');
 // import Toastify from "toastify-js";
 import './main.css';
 import './settingsPanel.js';

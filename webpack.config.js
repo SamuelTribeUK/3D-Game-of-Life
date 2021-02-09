@@ -3,7 +3,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
 module.exports = {
-	mode: "development",
 	entry: {
 		app: ['./src/index.js','./src/settingsPanel.js'],
 	},
@@ -20,11 +19,12 @@ module.exports = {
 		],
 	},
 	plugins: [
-			new HtmlWebpackPlugin({
-				title: '3D Game of Life - Samuel Tribe',
-				template: path.resolve(__dirname, './src/template.html'),
-				filename: 'index.html'
-			}),
-			new CleanWebpackPlugin(),
+		new HtmlWebpackPlugin({
+			title: '3D Game of Life - Samuel Tribe',
+			template: path.resolve(__dirname, './src/template.html'),
+			filename: 'index.html',
+			favicon: 'src/assets/images/favicon.ico'
+		}),
+		new CleanWebpackPlugin(),
 	],
 };

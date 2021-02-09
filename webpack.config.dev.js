@@ -1,9 +1,9 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require("webpack");
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const { merge } = require('webpack-merge');
+const common = require('./webpack.config.js');
 
-module.exports = {
+module.exports = merge(common, {
 	mode: "development",
 	devServer: {
 		historyApiFallback: true,
@@ -13,28 +13,8 @@ module.exports = {
 		hot: true,
 		port: 8080,
 	},
-	entry: {
-		app: ['./src/index.js','./src/settingsPanel.js'],
-	},
-	output: {
-		filename: 'bundle.js',
-		path: path.resolve(__dirname, 'dist'),
-	},
-	module: {
-		rules: [
-			{
-				test: /\.css$/i,
-				use: ['style-loader', 'css-loader'],
-			},
-		],
-	},
+	devtool: 'inline-source-map',
 	plugins: [
-		new HtmlWebpackPlugin({
-			title: 'live dev server',
-			template: path.resolve(__dirname, './src/template.html'),
-			filename: 'index.html'
-		}),
-		new CleanWebpackPlugin(),
 		new webpack.HotModuleReplacementPlugin(),
 	],
-};
+});
