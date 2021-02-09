@@ -190,6 +190,7 @@ let attachClickEvents = function() {
 	let rate = 1000 / timeout;
 	element.value = rate.toFixed(1);
 
+	// Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
 	window.addEventListener("resize", () => {
 		if (resizeTimer) {
 			clearTimeout(resizeTimer);
@@ -201,6 +202,7 @@ let attachClickEvents = function() {
 	// document.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
+// Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
 let resizeWindow = function() {
 	resizeTimer = false;
 	renderer.setSize(window.innerWidth, window.innerHeight);
