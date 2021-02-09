@@ -12,6 +12,7 @@ let ySize = 10;
 let zSize = 10;
 let timeout = 200;
 let orbitToggle = true;
+let resizeTimer = false;
 
 let gameBoard;
 
@@ -189,16 +190,25 @@ let attachClickEvents = function() {
 	let rate = 1000 / timeout;
 	element.value = rate.toFixed(1);
 
+	// Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
 	window.addEventListener("resize", () => {
-		renderer.setSize(window.innerWidth, window.innerHeight);
-		camera.aspect = (window.innerWidth) / (window.innerHeight);
-
-		camera.updateProjectionMatrix();
-		requestAnimationFrame(render);
+		if (resizeTimer) {
+			clearTimeout(resizeTimer);
+		}
+		resizeTimer = setTimeout(resizeWindow, 300);
 	});
 
 	// document.addEventListener("keydown", arrowKeyCameraControls);
 	// document.addEventListener('mousedown', onDocumentMouseDown, false);
+}
+
+// Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
+let resizeWindow = function() {
+	resizeTimer = false;
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	requestAnimationFrame(render);
 }
 
 /* updateColours iterates over the game board and updates the colours of the cubes on the canvas to represent the living
