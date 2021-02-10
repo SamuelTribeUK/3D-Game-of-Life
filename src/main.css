@@ -120,7 +120,7 @@ input[type="number"] {
     box-sizing: border-box;
     text-decoration: none;
     text-align: center;
-    transition: all 0.1s;
+    transition: all 0.2s;
 }
 
 .stopStart:hover, .step:hover, .updateButton:hover {
