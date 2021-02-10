@@ -10,15 +10,16 @@ import {
 } from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 let $ = require('jquery/src/core');
-// import Toastify from "toastify-js";
 import './main.css';
 import './settingsPanel.js';
+import {notify} from './notification.js';
 
 let xSize = 10;
 let ySize = 10;
 let zSize = 10;
 let timeout = 200;
 let orbitToggle = true;
+let warning = false;
 let orbitCheckbox;
 let resizeTimer = false;
 
@@ -100,6 +101,7 @@ let simulateStep = function() {
 		clearInterval(interval);
 		document.getElementById("stopStart").innerText = "Start";
 		status = "stopped";
+		notify("Game has ended","success",10000);
 		updateSidebar();
 	}
 
@@ -272,6 +274,7 @@ let toggleOrbitControls = function() {
 		controls.enabled = true;
 		controls.target = (new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0));
 		orbitToggle = true;
+		notify("Orbit controls enabled","success",5000);
 		render();
 	} else {
 		// Disable orbit controls
@@ -366,32 +369,32 @@ let newGameBoard = function(event) {
 	let timeInput = document.getElementById("timeoutInput").value;
 
 	if (inputX === "" || inputY === "" || timeInput === "") {
-		// notify("Dimensions or rate cannot be empty", "error", 5000);
+		notify("Dimensions or rate cannot be empty", "error", 5000);
 		return false;
 	}
 
 	if (inputX < 1 || inputY < 1 || inputZ < 1) {
-		// notify("Dimensions must be 1 or more", "error", 5000);
+		notify("Dimensions must be 1 or more", "error", 5000);
 		return false;
 	}
 
 
 	if (timeInput < 0.1) {
-		// notify("rate must be 0.1 or more", "error", 5000);
+		notify("speed must be 0.1 or more", "error", 5000);
 		return false;
 	}
 
-	// if (timeInput > 10) {
-	// 	notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
-	// }
+	if (timeInput > 10) {
+		notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
+	}
 
-	// if (inputX > 100 || inputY > 100) {
-	// 	if (!warning) {
-	// 		notify("WARNING: Large dimensions can use a lot of resources! Click update again if you are sure", "error", 5000);
-	// 		warning = true;
-	// 		return false;
-	// 	}
-	// }
+	if ((inputX * inputY * inputZ) > 1000)  {
+		if (!warning) {
+			notify("WARNING: Large dimensions can use a lot of resources! Click update again if you are sure", "error", 5000);
+			warning = true;
+			return false;
+		}
+	}
 
 	xSize = inputX;
 	ySize = inputY;
