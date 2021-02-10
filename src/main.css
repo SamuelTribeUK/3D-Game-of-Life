@@ -1,7 +1,10 @@
+* {
+    font-family: "Cascadia Code", serif;
+}
+
 body {
     margin: 0;
     height: 100vh;
-    font-family: "Cascadia Code", serif;
     background: #1a2639;
     position: absolute; /* Stay in place */
     overflow: hidden;
@@ -12,28 +15,46 @@ canvas {
     position: absolute; /* Stay in place */
 }
 
+label {
+    color: #f0f0f0;
+}
+
 /* The side panel menu */
 .settingsPanel {
-    height: 100vh; /* Specify a height */
+    height: 220px;
     width: 0; /* 0 width - change this with JavaScript */
     position: absolute; /* Stay in place */
     z-index: 2; /* Stay on top */
-    top: 0;
-    left: 0;
+    top: 10px;
+    left: 10px;
     background: linear-gradient(to top right, #8A261C, #B2482E);
     box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     overflow-x: hidden; /* Disable horizontal scroll */
     padding-top: 20px;
-    font-family: "Cascadia Code", serif;
     transition: 0.15s;
 }
 
-.settingsPanel p, a, label {
-    text-decoration: none;
+.settingsPanel p, a {
     font-size: 16px;
-    font-family: "Cascadia Code", serif;
     color: #f0f0f0;
     transition: 0.3s;
+}
+
+.inputForm label {
+    font-size: 16px;
+    float: left;
+    display: block;
+    transition: 0.3s;
+}
+
+.inputForm input[type="number"] {
+    float: right;
+    margin-right: 20px;
+    height: 11px;
+}
+
+.settingsPanel a {
+    text-decoration: none;
 }
 
 /* The side panel text */
@@ -75,33 +96,35 @@ canvas {
     display: inline-block;
 }
 
-.inputField {
-    float: right;
-    margin-right: 20px;
-    height: 11px;
-}
-
-.inputLabel {
-    float: left;
-}
-
 .updateButton {
-    margin-right: 10px;
-    width: 230px;
-}
-
-.updateButton {
-    font-family: "Cascadia Code", serif;
     margin-top: 5px;
+    margin-right: 10px;
+    width: 180px;
+    border: 0.1em solid #f0f0f0;
+    border-radius: 0.12em;
+    box-sizing: border-box;
+    font-size: 25px;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s;
 }
 
 input[type="number"] {
     width: 50px;
-    font-family: "Cascadia Code", serif;
 }
 
-.stopStart {
-    font-family: "Cascadia Code", serif;
+.stopStart, .step {
+    font-size: 20px;
+    border: 0.1em solid #f0f0f0;
+    border-radius: 0.12em;
+    box-sizing: border-box;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.1s;
+}
 
-    font-size: 25px;
+.stopStart:hover, .step:hover, .updateButton:hover {
+    border-color: #1a2639;
+    color: #f0f0f0;
+    background-color: #1a2639;
 }
