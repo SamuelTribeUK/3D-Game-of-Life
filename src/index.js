@@ -264,18 +264,22 @@ let disableOrbit = function() {
 	document.addEventListener("keydown", arrowKeyCameraControls);
 }
 
+let enableOrbit = function() {
+	// Enable orbit controls
+	document.removeEventListener("keydown", arrowKeyCameraControls);
+	controls.enabled = true;
+	controls.target = (new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0));
+	orbitToggle = true;
+	notify("Orbit controls enabled","success",5000);
+	render();
+}
+
 /* toggleOrbitControls handles the orbit camera controls being enabled/disabled and configures the target of the camera.
  * The arrow key event listeners for the standard camera controls are disabled when enabling orbit controls to avoid
  * conflicts with the existing event listeners included with orbit controls */
 let toggleOrbitControls = function() {
 	if (orbitCheckbox.checked) {
-		// Enable orbit controls
-		document.removeEventListener("keydown", arrowKeyCameraControls);
-		controls.enabled = true;
-		controls.target = (new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0));
-		orbitToggle = true;
-		notify("Orbit controls enabled","success",5000);
-		render();
+		enableOrbit();
 	} else {
 		// Disable orbit controls
 		disableOrbit();
@@ -425,13 +429,13 @@ let newGameBoard = function(event) {
 
 	updateSidebar();
 
-	// if (orbitToggle) {
-	// 	orbitCheckbox.checked = false;
-	// 	disableOrbit();
-	// } else {
-	// 	render();
-	// }
-	render();
+	if (orbitToggle) {
+		// If orbitToggle is enabled then disable and wait 10ms before enabling, this removes the lag issue after update
+		disableOrbit();
+		setTimeout(enableOrbit, 10);
+	} else {
+		render();
+	}
 }
 
 /* doDispose is a thorough deep dispose of the scene and it's children. This is called when a new game board is made to
