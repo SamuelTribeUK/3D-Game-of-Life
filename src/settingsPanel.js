@@ -1,15 +1,21 @@
 // This code is for the opening and closing of the settings panel on the left side of the webpage
-function openNav(e) {
-	document.getElementById("mySidepanel").style.width = "250px";
-	console.log(document.getElementById("mySidepanel").style.width);
+
+function openNav() {
+	document.getElementById("settingsPanel").style.width = "200px";
+	document.getElementById("settingsPanel").style.paddingLeft = "15px";
+	document.getElementById("settingsPanel").style.paddingRight = "15px";
+
 }
 
-function closeNav(e) {
-	document.getElementById("mySidepanel").style.width = "0";
+function closeNav() {
+	document.getElementById("settingsPanel").style.width = "0";
+	document.getElementById("settingsPanel").style.paddingLeft = "0";
+	document.getElementById("settingsPanel").style.paddingRight = "0";
 }
 
 window.onload = function(){
-	console.log("loaded");
 	document.getElementById("closebtn").onclick = closeNav;
 	document.getElementById("openbtn").onclick = openNav;
+	// Settings are shown on window load automatically
+	openNav();
 }

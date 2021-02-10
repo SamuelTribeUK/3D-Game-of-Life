@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title><%= htmlWebpackPlugin.options.title %></title>
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+<body>
+<div id="settingsPanel" class="settingsPanel">
+	<a id="closebtn" href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+	<button class="stopStart" id="stopStart">Start</button>
+	<button class="step" id="step">Step</button>
+	<div class="gameInfo">
+		<p id="status"></p>
+		<p id="iterations"></p>
+	</div>
+	<div class="orbitToggle">
+		<label class="orbitBox" for="orbitControls">Orbit Controls:</label>
+		<input class="orbitBox" type="checkbox" id="orbitControls"/><br>
+	</div>
+
+	<form class="inputForm">
+		<div class="Inputs">
+			<label class="inputLabel" for="xSizeInput">x Size:</label>
+			<input class="inputField" type="number" id="xSizeInput" min="1" required>
+		</div>
+		<br>
+		<div class="Inputs">
+			<label class="inputLabel" for="ySizeInput">y Size:</label>
+			<input class="inputField" type="number" id="ySizeInput" min="1" required>
+		</div>
+		<br>
+		<div class="Inputs">
+			<label class="inputLabel" for="zSizeInput">z Size:</label>
+			<input class="inputField" type="number" id="zSizeInput" min="1" required>
+		</div>
+		<br>
+		<div class="Inputs">
+			<label class="inputLabel" for="timeoutInput">Speed:</label>
+			<input class="inputField" type="number" id="timeoutInput" min="0.1" step="0.1" required>
+		</div>
+
+		<div class="submitValues">
+			<input class="updateButton" type="submit" id="submit" value="Update">
+		</div>
+	</form>
+	<div class="generalInfo">
+		<p>This is a 3D implementation of <br> <a href="https://conwaylife.com/wiki/Main_Page" target="_blank">Conway's Game of Life</a></p>
+		<br>
+		<p>Project source code available on <a href="https://github.com/SamuelTribeUK/3D-Game-of-Life" target="_blank">GitHub</a></p>
+		<br>
+		<p>version <%= htmlWebpackPlugin.options.version %></p>
+	</div>
+
+</div>
+<button id="openbtn" class="openbtn">&#9881;</button>
+<canvas id="canvas"></canvas>
+</body>
+</html>

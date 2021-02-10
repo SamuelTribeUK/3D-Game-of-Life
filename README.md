@@ -1,12 +1,11 @@
-# 3D-Game-of-Life
+# 3D-Game-of-Life version 1.0
 A Web-Based 3D Implementation of John Conway’s Game of Life Cellular Automaton (Final Year Project)
-
 This is the git repository for my final year university project. This project aims to create a web-based 3D version of the game of life cellular automaton (https://www.conwaylife.com/)
+This version allows users to create custom grid sizes and game speeds, stop and start the game, and step through a single iteration. Notifications are displayed using toastify-js when settings are invalid or if the settings might cause lag.
 
-At the start of the project, I will be learning webpack while developing the core components using JavaScript and three.js for the graphical representation of the game. I created a prototype project for a web-based implementation of the standard game of life (2-dimensional) so a lot of the starting code will be directly from that project.
+## How to deploy to the webserver
+After the new configuration changes and new files added in wip-core-server, the project can now be deployed to a web server. For this project, I am using an IONOS VPS running Ubuntu 20.04, I use Nginx configured to use port 3000 as this is the node application port for my project and it is fully configured with SSL and a domain (gol.samueltribe.com).
 
-The master branch will eventually be the most recent stable release build, with the dev branch being stable development builds and any other branches should branch from this dev branch or its children, although due to me being the only developer and the relative simplicity of the development process (very few files, all on one page) there might not be branches off children of dev.
+When I want to deploy to the server (usually after merging a feature branch with dev or dev with master) I clone the git repo on the webserver, change to the desired branch and use npm install (ensure you've installed node js and npm), then run 'npm run build-production'. This will generate the production build of the project within the dist folder. I have a server.js file using express to use the dist folder for the application and to listen on port 3000 (for Nginx). I then use 'forever' to start server.js forever in the background (helpful when using SSL like me), then try to connect to the website.
 
-I treat new branches as new features, for example if I wanted to implement the Toastify notifications (like in my 2D project) then I could create a new branch from dev called "notifications" and I will develop that one component only, then merge with dev once completed (and tested, it should not be merged if it does not work!).
-
-Due to personal difficulties IRL, I have started the bulk of the coding for this project later than expected but I am confident that I can now crack on and code the bulk of it soon
+Hopefully, if all is completed correctly, you should see the 3D Game of Life webpage!
