@@ -9,6 +9,7 @@
 <div id="settingsPanel" class="settingsPanel">
 	<a id="closebtn" href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
 	<button class="stopStart" id="stopStart">Start</button>
+	<button class="step" id="step">Step</button>
 	<p id="status"></p>
 	<p id="iterations"></p>
 
@@ -17,22 +18,29 @@
 		<input class="orbitBox" type="checkbox" id="orbitControls"/><br>
 	</div>
 
-	<form>
-		<div class="xInputs">
-			<label class="inputLabel" for="xSizeInput">Number of Columns:</label>
+	<form class="inputForm">
+		<div class="Inputs">
+			<label class="inputLabel" for="xSizeInput">x Size:</label>
 			<input class="inputField" type="number" id="xSizeInput" min="1" required>
 		</div>
-		<div class="yInputs">
-			<label class="inputLabel" for="ySizeInput">Number of Rows:</label>
+		<br>
+		<div class="Inputs">
+			<label class="inputLabel" for="ySizeInput">y Size:</label>
 			<input class="inputField" type="number" id="ySizeInput" min="1" required>
 		</div>
-		<div class="timeInputs">
-			<label class="inputLabel" for="timeoutInput">Rate (per second):</label>
+		<br>
+		<div class="Inputs">
+			<label class="inputLabel" for="zSizeInput">z Size:</label>
+			<input class="inputField" type="number" id="zSizeInput" min="1" required>
+		</div>
+		<br>
+		<div class="Inputs">
+			<label class="inputLabel" for="timeoutInput">Speed:</label>
 			<input class="inputField" type="number" id="timeoutInput" min="0.1" step="0.1" required>
 		</div>
 
 		<div class="submitValues">
-			<input class="updateButton" type="submit" id="submit" value="update">
+			<input class="updateButton" type="submit" id="submit" value="Update">
 		</div>
 	</form>
 </div>
