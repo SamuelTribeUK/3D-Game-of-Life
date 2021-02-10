@@ -21,7 +21,7 @@ label {
 
 /* The side panel menu */
 .settingsPanel {
-    height: 220px;
+    height: 340px;
     width: 0; /* 0 width - change this with JavaScript */
     position: absolute; /* Stay in place */
     z-index: 2; /* Stay on top */
@@ -29,12 +29,12 @@ label {
     left: 10px;
     background: linear-gradient(to top right, #8A261C, #B2482E);
     box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    overflow-x: hidden; /* Disable horizontal scroll */
+    overflow: hidden;
     padding-top: 20px;
     transition: 0.15s;
 }
 
-.settingsPanel p, a {
+.gameInfo p, a {
     font-size: 16px;
     color: #f0f0f0;
     transition: 0.3s;
@@ -49,11 +49,10 @@ label {
 
 .inputForm input[type="number"] {
     float: right;
-    margin-right: 20px;
     height: 11px;
 }
 
-.settingsPanel a {
+.closebtn {
     text-decoration: none;
 }
 
@@ -98,8 +97,7 @@ label {
 
 .updateButton {
     margin-top: 5px;
-    margin-right: 10px;
-    width: 180px;
+    width: 100%;
     border: 0.1em solid #f0f0f0;
     border-radius: 0.12em;
     box-sizing: border-box;
@@ -127,4 +125,11 @@ input[type="number"] {
     border-color: #1a2639;
     color: #f0f0f0;
     background-color: #1a2639;
+}
+
+.generalInfo, .generalInfo a {
+    font-size: 13px;
+    color: #f0f0f0;
+    margin-top: 5px;
+    text-align: center;
 }
