@@ -13,6 +13,7 @@ let $ = require('jquery/src/core');
 import './main.css';
 import './settingsPanel.js';
 import {notify} from './notification.js';
+import Worker from "./game.worker.js";
 
 let xSize = 10;
 let ySize = 10;
@@ -24,6 +25,9 @@ let orbitCheckbox;
 let resizeTimer = false;
 
 let gameBoard;
+let gameArray;
+
+let worker;
 
 let liveCellColour = "#c24d2c";
 let deadCellColour = "#d9dad7";
@@ -48,67 +52,97 @@ let light = new AmbientLight(0xFFFFFF,1);
  * updated with their respective functions */
 let simulateStep = function() {
 	console.log("simulate step called");
-	let newGameBoard = $.extend(true, [], gameBoard);
-
 	let changed = false;
 
-	for (let i = 0; i < xSize; i++) {
-		for (let j = 0; j < ySize; j++) {
-			for (let k = 0; k < zSize; k++) {
-				let liveNum = 0;
-				for (let l = -1; l < 2; l++) {
-					for (let m = -1; m < 2; m++) {
-						for (let n = -1; n < 2; n++) {
-							if (!((l === 0) && (m === 0) && (n === 0))) {
-								liveNum += checkCell(i+l, j+m, k+n);
+	if (window.Worker) {
+
+		worker.postMessage([gameArray,xSize,ySize,zSize]);
+
+		worker.onmessage = function(e) {
+			console.log("Message received from game.worker.js");
+			gameArray = e.data[0];
+			changed = e.data[1];
+
+			iterations += 1;
+
+			if (!changed) {
+				clearInterval(interval);
+				document.getElementById("stopStart").innerText = "Start";
+				status = "stopped";
+				notify("Game has ended","success",10000);
+				updateSidebar();
+			}
+
+			updateSidebar();
+			updateColours();
+
+			if (!(orbitToggle)) requestAnimationFrame(render);
+		};
+	} else {
+		let newGameBoard = $.extend(true, [], gameBoard);
+		let newGameArray = $.extend(true, [], gameArray);
+
+		for (let i = 0; i < xSize; i++) {
+			for (let j = 0; j < ySize; j++) {
+				for (let k = 0; k < zSize; k++) {
+					let liveNum = 0;
+					for (let l = -1; l < 2; l++) {
+						for (let m = -1; m < 2; m++) {
+							for (let n = -1; n < 2; n++) {
+								if (!((l === 0) && (m === 0) && (n === 0))) {
+									liveNum += checkCell(i+l, j+m, k+n);
+								}
 							}
 						}
 					}
-				}
-				// B3/S23 (Standard 2D GoL)
-				if ((liveNum === 3) && gameBoard[i][j][k].state === 0) {
-					changed = true;
-					newGameBoard[i][j][k].state = 1;
-				} else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
-					changed = true;
-					newGameBoard[i][j][k].state = 0;
-				}
+					// B3/S23 (Standard 2D GoL)
+					if ((liveNum === 3) && gameBoard[i][j][k].state === 0) {
+						changed = true;
+						newGameBoard[i][j][k].state = 1;
+						gameArray[i][j][k] = 1;
+					} else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
+						changed = true;
+						newGameBoard[i][j][k].state = 0;
+						gameArray[i][j][k] = 0;
+					}
 
-				// B45/S5
-				// if ((liveNum === 4 || liveNum === 5) && gameBoard[i][j][k].state === 0) {
-				// 	changed = true;
-				// 	newGameBoard[i][j][k].state = 1;
-				// } else if (!(liveNum === 5) && gameBoard[i][j][k].state === 1) {
-				// 	newGameBoard[i][j][k].state = 0;
-				// }
+					// B45/S5
+					// if ((liveNum === 4 || liveNum === 5) && gameBoard[i][j][k].state === 0) {
+					// 	changed = true;
+					// 	newGameBoard[i][j][k].state = 1;
+					// } else if (!(liveNum === 5) && gameBoard[i][j][k].state === 1) {
+					// 	newGameBoard[i][j][k].state = 0;
+					// }
 
-				// B36/S23 (2D Highlife)
-				// if ((liveNum === 3 || liveNum === 6) && gameBoard[i][j][k].state === 0) {
-				// 	changed = true;
-				// 	newGameBoard[i][j][k].state = 1;
-				// } else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
-				// 	changed = true;
-				// 	newGameBoard[i][j][k].state = 0;
-				// }
+					// B36/S23 (2D Highlife)
+					// if ((liveNum === 3 || liveNum === 6) && gameBoard[i][j][k].state === 0) {
+					// 	changed = true;
+					// 	newGameBoard[i][j][k].state = 1;
+					// } else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
+					// 	changed = true;
+					// 	newGameBoard[i][j][k].state = 0;
+					// }
+				}
 			}
 		}
-	}
-	gameBoard = $.extend(true, [], newGameBoard);
+		gameBoard = $.extend(true, [], newGameBoard);
+		gameArray = $.extend(true, [], newGameArray);
 
-	iterations += 1;
+		iterations += 1;
 
-	if (!changed) {
-		clearInterval(interval);
-		document.getElementById("stopStart").innerText = "Start";
-		status = "stopped";
-		notify("Game has ended","success",10000);
+		if (!changed) {
+			clearInterval(interval);
+			document.getElementById("stopStart").innerText = "Start";
+			status = "stopped";
+			notify("Game has ended","success",10000);
+			updateSidebar();
+		}
+
 		updateSidebar();
+		updateColours();
+
+		if (!(orbitToggle)) requestAnimationFrame(render);
 	}
-
-	updateSidebar();
-	updateColours();
-
-	if (!(orbitToggle)) requestAnimationFrame(render);
 }
 
 /* checkCell takes an x, y and z value and checks the game board if the cell at that location is alive or dead and returns
@@ -146,10 +180,13 @@ let setupScene = function() {
 let initialiseBoard = function() {
 	document.getElementById("stopStart").innerText = "Start";
 	gameBoard = new Array(xSize);
+	gameArray = new Array(xSize);
 	for (let i = 0; i < xSize; i++) {
 		gameBoard[i] = new Array(ySize);
+		gameArray[i] = new Array(ySize);
 		for (let j = 0; j < ySize; j++) {
 			gameBoard[i][j] = new Array(zSize);
+			gameArray[i][j] = new Array(zSize);
 		}
 	}
 
@@ -158,6 +195,7 @@ let initialiseBoard = function() {
 			for (let k = 0; k < zSize; k++) {
 				let state = Math.floor(Math.random() * 2);
 				addMesh(state, i, j, k);
+				gameArray[i][j][k] = state;
 			}
 		}
 	}
@@ -334,7 +372,9 @@ let updateColours = function() {
 	for (let i = 0; i < xSize; i++) {
 		for (let j = 0; j < ySize; j++) {
 			for (let k = 0; k < zSize; k++) {
-				state = gameBoard[i][j][k].state;
+				gameBoard[i][j][k].state = gameArray[i][j][k];
+				state = gameArray[i][j][k];
+
 				opacity = 1;
 				colour = liveCellColour;
 				if (state === 0) {
@@ -413,6 +453,12 @@ let newGameBoard = function(event) {
 	}
 
 	gameBoard = null;
+	gameArray = null;
+	if (worker) {
+		worker.terminate();
+	}
+	worker = undefined;
+	worker = new Worker();
 	iterations = 0;
 
 	scene = new Scene();
@@ -469,7 +515,6 @@ let doDispose = function(obj) {
 setupScene();
 initialiseBoard();
 
-
 let existingOnload = window.onload;
 window.onload = function(){
 	// If a function is already assigned to window.onload then execute that first, then run code below
@@ -478,7 +523,7 @@ window.onload = function(){
 	orbitCheckbox = document.getElementById("orbitControls");
 	orbitCheckbox.checked = true;
 	attachClickEvents();
-
+	worker = new Worker();
 	interval = setInterval(simulateStep, timeout);
 	document.getElementById("stopStart").innerText = "Stop";
 	status = "playing";
