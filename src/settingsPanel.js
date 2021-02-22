@@ -16,6 +16,7 @@ function closeNav() {
 window.onload = function(){
 	document.getElementById("closebtn").onclick = closeNav;
 	document.getElementById("openbtn").onclick = openNav;
+	document.getElementById("jsonTextInput").style.height = "0px";
 	// Settings are shown on window load automatically
 	openNav();
 }

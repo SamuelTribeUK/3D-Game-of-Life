@@ -206,6 +206,9 @@ let attachClickEvents = function() {
 	let rate = 1000 / timeout;
 	element.value = rate.toFixed(1);
 
+	document.getElementById("jsonBtn").onclick = showHideJSON;
+	document.getElementById("jsonLoadBtn").onclick = loadJSON;
+
 	// Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
 	window.addEventListener("resize", () => {
 		if (resizeTimer) {
@@ -466,6 +469,55 @@ let doDispose = function(obj) {
 	obj = undefined;
 }
 
+let gameToJSON = function() {
+	let gameArray = new Array(xSize);
+	for (let i = 0; i < xSize; i++) {
+		gameArray[i] = new Array(ySize);
+		for (let j = 0; j < ySize; j++) {
+			gameArray[i][j] = new Array(zSize);
+			for (let k = 0; k < zSize; k++) {
+					gameArray[i][j][k] = gameBoard[i][j][k].state;
+			}
+		}
+	}
+	return JSON.stringify(gameArray);
+}
+
+function showHideJSON() {
+	let jsonTextarea = document.getElementById("jsonTextInput");
+	let jsonBtn = document.getElementById("jsonBtn");
+	let settingsPanel = document.getElementById("settingsPanel");
+	let jsonLoadBtn = document.getElementById("jsonLoadBtn");
+
+	if (jsonBtn.innerText === "show JSON") {
+		jsonTextarea.style.height = "200px";
+		jsonTextarea.style.visibility = "visible";
+		jsonBtn.innerText = "hide JSON";
+		jsonLoadBtn.style.visibility = "visible";
+		jsonLoadBtn.style.display = "block";
+		settingsPanel.style.height = "600px";
+		jsonTextarea.innerText = gameToJSON();
+	} else {
+		jsonTextarea.style.height = "0px";
+		jsonTextarea.style.visibility = "hidden";
+		jsonBtn.innerText = "show JSON";
+		jsonLoadBtn.style.visibility = "hidden";
+		jsonLoadBtn.style.display = "none";
+		settingsPanel.style.height = "390px";
+	}
+}
+
+let loadJSON = function() {
+	let input = document.getElementById("jsonTextInput").textContent;
+	try {
+		let gameArray = JSON.parse(input);
+		console.log(gameArray);
+	} catch (e) {
+		console.log("Error in reading JSON!");
+		console.log(e);
+	}
+}
+
 setupScene();
 initialiseBoard();
 
@@ -479,10 +531,14 @@ window.onload = function(){
 	orbitCheckbox.checked = true;
 	attachClickEvents();
 
-	interval = setInterval(simulateStep, timeout);
-	document.getElementById("stopStart").innerText = "Stop";
-	status = "playing";
+	// interval = setInterval(simulateStep, timeout);
+	document.getElementById("stopStart").innerText = "Start";
+	status = "stopped";
 	updateSidebar();
+
+
+
+	gameToJSON();
 };
 
 render();

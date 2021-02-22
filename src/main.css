@@ -21,7 +21,7 @@ label {
 
 /* The side panel menu */
 .settingsPanel {
-    height: 340px;
+    height: 390px;
     width: 0; /* 0 width - change this with JavaScript */
     position: absolute; /* Stay in place */
     z-index: 2; /* Stay on top */
@@ -67,6 +67,32 @@ label {
     right: 10px;
     font-size: 36px;
     margin-left: 50px;
+}
+
+.jsonBtn, .jsonTextInput, .jsonLoadBtn {
+    margin-top: 5px;
+    width: 100%;
+    border: 0.1em solid #f0f0f0;
+    border-radius: 0.12em;
+    box-sizing: border-box;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.jsonBtn {
+    font-size: 15px;
+}
+
+.jsonTextInput {
+    font-size: 8px;
+    visibility: hidden;
+}
+
+.jsonLoadBtn {
+    margin-top: 0;
+    visibility: hidden;
+    display: none;
 }
 
 .openbtn {
@@ -121,7 +147,7 @@ input[type="number"] {
     transition: all 0.2s;
 }
 
-.stopStart:hover, .step:hover, .updateButton:hover {
+.stopStart:hover, .step:hover, .updateButton:hover, .jsonBtn:hover, .jsonLoadBtn:hover {
     border-color: #1a2639;
     color: #f0f0f0;
     background-color: #1a2639;
