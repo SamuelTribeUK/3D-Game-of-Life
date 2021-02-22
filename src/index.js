@@ -24,6 +24,7 @@ let orbitCheckbox;
 let resizeTimer = false;
 
 let gameBoard;
+let gameArray;
 
 let liveCellColour = "#c24d2c";
 let deadCellColour = "#d9dad7";
@@ -48,7 +49,7 @@ let light = new AmbientLight(0xFFFFFF,1);
  * updated with their respective functions */
 let simulateStep = function() {
 	console.log("simulate step called");
-	let newGameBoard = $.extend(true, [], gameBoard);
+	let newGameArray = $.extend(true, [], gameArray);
 
 	let changed = false;
 
@@ -66,34 +67,34 @@ let simulateStep = function() {
 					}
 				}
 				// B3/S23 (Standard 2D GoL)
-				if ((liveNum === 3) && gameBoard[i][j][k].state === 0) {
-					changed = true;
-					newGameBoard[i][j][k].state = 1;
-				} else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
-					changed = true;
-					newGameBoard[i][j][k].state = 0;
-				}
-
-				// B45/S5
-				// if ((liveNum === 4 || liveNum === 5) && gameBoard[i][j][k].state === 0) {
+				// if ((liveNum === 3) && gameArray[i][j][k] === 0) {
 				// 	changed = true;
-				// 	newGameBoard[i][j][k].state = 1;
-				// } else if (!(liveNum === 5) && gameBoard[i][j][k].state === 1) {
-				// 	newGameBoard[i][j][k].state = 0;
+				// 	newGameArray[i][j][k] = 1;
+				// } else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
+				// 	changed = true;
+				// 	newGameArray[i][j][k] = 0;
 				// }
 
+				// B45/S5
+				if ((liveNum === 4 || liveNum === 5) && gameArray[i][j][k] === 0) {
+					changed = true;
+					newGameArray[i][j][k] = 1;
+				} else if (!(liveNum === 5) && gameArray[i][j][k] === 1) {
+					newGameArray[i][j][k] = 0;
+				}
+
 				// B36/S23 (2D Highlife)
-				// if ((liveNum === 3 || liveNum === 6) && gameBoard[i][j][k].state === 0) {
+				// if ((liveNum === 3 || liveNum === 6) && gameArray[i][j][k] === 0) {
 				// 	changed = true;
-				// 	newGameBoard[i][j][k].state = 1;
-				// } else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
+				// 	newGameArray[i][j][k] = 1;
+				// } else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
 				// 	changed = true;
-				// 	newGameBoard[i][j][k].state = 0;
+				// 	newGameArray[i][j][k] = 0;
 				// }
 			}
 		}
 	}
-	gameBoard = $.extend(true, [], newGameBoard);
+	gameArray = $.extend(true, [], newGameArray);
 
 	iterations += 1;
 
@@ -120,7 +121,7 @@ let checkCell = function(currX, currY, currZ) {
 		return 0;
  	} else if (currZ < 0 || currZ >= zSize) {
 		return 0;
-	} else if (gameBoard[currX][currY][currZ].state === 1) {
+	} else if (gameArray[currX][currY][currZ] === 1) {
 		return 1;
 	} else {
 		return 0;
@@ -143,13 +144,16 @@ let setupScene = function() {
 }
 
 // Initialise the 3D array game board with the specified x, y and z sizes and populate it with random cells
-let initialiseBoard = function() {
+let newRandomBoard = function() {
 	document.getElementById("stopStart").innerText = "Start";
 	gameBoard = new Array(xSize);
+	gameArray = new Array(xSize);
 	for (let i = 0; i < xSize; i++) {
 		gameBoard[i] = new Array(ySize);
+		gameArray[i] = new Array(ySize);
 		for (let j = 0; j < ySize; j++) {
 			gameBoard[i][j] = new Array(zSize);
+			gameArray[i][j] = new Array(zSize);
 		}
 	}
 
@@ -158,6 +162,20 @@ let initialiseBoard = function() {
 			for (let k = 0; k < zSize; k++) {
 				let state = Math.floor(Math.random() * 2);
 				addMesh(state, i, j, k);
+			}
+		}
+	}
+}
+
+let newBoardFromJSON = function() {
+	document.getElementById("stopStart").innerText = "Start";
+	gameBoard = new Array(xSize);
+	for (let i = 0; i < xSize; i++) {
+		gameBoard[i] = new Array(ySize);
+		for (let j = 0; j < ySize; j++) {
+			gameBoard[i][j] = new Array(zSize);
+			for (let k = 0; k < zSize; k++) {
+				addMesh(gameArray[i][j][k],i,j,k);
 			}
 		}
 	}
@@ -175,8 +193,9 @@ let addMesh = function(state, i, j, k) {
 	let material = new MeshLambertMaterial({color: colour, opacity: opacity, transparent: true});
 	let mesh = new Mesh(geometry, material);
 	mesh.position.set(i,j,k);
-	gameBoard[i][j][k] = {box: mesh, state: state};
-	scene.add(gameBoard[i][j][k].box);
+	gameArray[i][j][k] = state;
+	gameBoard[i][j][k] = mesh;
+	scene.add(gameBoard[i][j][k]);
 }
 
 /* The functions that handle all buttons and inputs on the side panel are attached in this function, as well as the
@@ -217,7 +236,7 @@ let attachClickEvents = function() {
 		resizeTimer = setTimeout(resizeWindow, 100);
 	});
 
-	document.addEventListener("keydown", arrowKeyCameraControls);
+	// document.addEventListener("keydown", arrowKeyCameraControls);
 }
 
 // Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
@@ -337,15 +356,15 @@ let updateColours = function() {
 	for (let i = 0; i < xSize; i++) {
 		for (let j = 0; j < ySize; j++) {
 			for (let k = 0; k < zSize; k++) {
-				state = gameBoard[i][j][k].state;
+				state = gameArray[i][j][k];
 				opacity = 1;
 				colour = liveCellColour;
 				if (state === 0) {
 					opacity = 0.1;
 					colour = deadCellColour;
 				}
-				gameBoard[i][j][k].box.material.opacity = (opacity);
-				gameBoard[i][j][k].box.material.color.set(colour);
+				gameBoard[i][j][k].material.opacity = (opacity);
+				gameBoard[i][j][k].material.color.set(colour);
 			}
 		}
 	}
@@ -355,6 +374,9 @@ let updateColours = function() {
 let updateSidebar = function() {
 	document.getElementById("status").innerText = "Status: " + status;
 	document.getElementById("iterations").innerText = "Iterations: " + iterations;
+	document.getElementById("xSizeInput").innerText = xSize.toString();
+	document.getElementById("ySizeInput").innerText = ySize.toString();
+	document.getElementById("zSizeInput").innerText = zSize.toString();
 }
 
 /* render renders the objects in the scene in accordance to the camera location. If orbit controls are enabled then an
@@ -364,6 +386,14 @@ let render = function() {
 		requestAnimationFrame(render);
 	}
 	renderer.render(scene, camera);
+}
+
+let resetCamera = function() {
+	camera.position.x = (xSize - 1) / 2;
+	camera.position.y = (ySize - 1) / 2;
+	camera.lookAt(new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0))
+
+	camera.updateProjectionMatrix();
 }
 
 /* newGameBoard is called when the user clicks the update button on the side bar. First the inputs are validated and if
@@ -416,21 +446,22 @@ let newGameBoard = function(event) {
 	}
 
 	gameBoard = null;
+	gameArray = null;
 	iterations = 0;
 
 	scene = new Scene();
 
 	setupScene();
 
-	initialiseBoard();
+	newRandomBoard();
 
-	camera.position.x = (xSize - 1) / 2;
-	camera.position.y = (ySize - 1) / 2;
-	camera.lookAt(new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0))
-
-	camera.updateProjectionMatrix();
+	resetCamera();
 
 	updateSidebar();
+	let jsonTextarea = document.getElementById("jsonTextInput");
+	if (jsonTextarea.style.visibility === "visible") {
+		jsonTextarea.textContent = JSON.stringify(gameArray);
+	}
 
 	if (orbitToggle) {
 		// If orbitToggle is enabled then disable and wait 10ms before enabling, this removes the lag issue after update
@@ -469,20 +500,6 @@ let doDispose = function(obj) {
 	obj = undefined;
 }
 
-let gameToJSON = function() {
-	let gameArray = new Array(xSize);
-	for (let i = 0; i < xSize; i++) {
-		gameArray[i] = new Array(ySize);
-		for (let j = 0; j < ySize; j++) {
-			gameArray[i][j] = new Array(zSize);
-			for (let k = 0; k < zSize; k++) {
-					gameArray[i][j][k] = gameBoard[i][j][k].state;
-			}
-		}
-	}
-	return JSON.stringify(gameArray);
-}
-
 function showHideJSON() {
 	let jsonTextarea = document.getElementById("jsonTextInput");
 	let jsonBtn = document.getElementById("jsonBtn");
@@ -496,7 +513,7 @@ function showHideJSON() {
 		jsonLoadBtn.style.visibility = "visible";
 		jsonLoadBtn.style.display = "block";
 		settingsPanel.style.height = "600px";
-		jsonTextarea.innerText = gameToJSON();
+		jsonTextarea.value = JSON.stringify(gameArray);;
 	} else {
 		jsonTextarea.style.height = "0px";
 		jsonTextarea.style.visibility = "hidden";
@@ -508,18 +525,68 @@ function showHideJSON() {
 }
 
 let loadJSON = function() {
-	let input = document.getElementById("jsonTextInput").textContent;
+	let input = document.getElementById("jsonTextInput").value;
+	console.log(input);
 	try {
-		let gameArray = JSON.parse(input);
-		console.log(gameArray);
+		let parsedInput = JSON.parse(input);
+		let incorrectFormat = false;
+		for (let i = 0; i < parsedInput.length; i++) {
+			if (parsedInput[i].length !== parsedInput[0].length) {
+				incorrectFormat = true;
+			}
+			for (let j = 0; j < parsedInput[0].length; j++) {
+				if (parsedInput[i][j].length !== parsedInput[0][0].length) {
+					incorrectFormat = true;
+				}
+			}
+		}
+
+		if (incorrectFormat) {
+			notify("ERROR: incorrect JSON Array format","error",3000);
+
+		}
+
+		doDispose(scene);
+
+
+		if (status === "playing") {
+			stopStart();
+		}
+
+		gameBoard = undefined;
+		gameArray = undefined;
+		gameArray = JSON.parse(input);
+		iterations = 0;
+
+		xSize = gameArray.length;
+		ySize = gameArray[0].length;
+		zSize = gameArray[0][0].length;
+
+		scene = new Scene();
+
+		setupScene();
+
+		newBoardFromJSON();
+
+		resetCamera();
+
+		updateSidebar();
+
+		if (orbitToggle) {
+			// If orbitToggle is enabled then disable and wait 10ms before enabling, this removes the lag issue after update
+			disableOrbit();
+			setTimeout(enableOrbit, 10);
+		} else {
+			render();
+		}
+		updateColours();
 	} catch (e) {
-		console.log("Error in reading JSON!");
-		console.log(e);
+		notify("ERROR: incorrect JSON", "error", 3000);
 	}
 }
 
 setupScene();
-initialiseBoard();
+newRandomBoard();
 
 
 let existingOnload = window.onload;
@@ -535,10 +602,6 @@ window.onload = function(){
 	document.getElementById("stopStart").innerText = "Start";
 	status = "stopped";
 	updateSidebar();
-
-
-
-	gameToJSON();
 };
 
 render();
