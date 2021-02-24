@@ -87,6 +87,7 @@ h1 {
 .jsonBtn, .jsonTextInput, .jsonLoadBtn {
     margin-top: 5px;
     width: 100%;
+    height: min-content;
     border: 0.1em solid #f0f0f0;
     border-radius: 0.12em;
     box-sizing: border-box;
@@ -139,6 +140,7 @@ h1 {
 .updateButton {
     margin-top: 5px;
     width: 100%;
+    height: min-content;
     border: 0.1em solid #f0f0f0;
     border-radius: 0.12em;
     box-sizing: border-box;
@@ -154,6 +156,7 @@ input[type="number"] {
 
 .stopStart, .step, .reset {
     font-size: 15px;
+    height: min-content;
     border: 0.1em solid #f0f0f0;
     border-radius: 0.12em;
     box-sizing: border-box;
