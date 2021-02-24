@@ -41,7 +41,7 @@ const canvas = document.querySelector('canvas');
 let scene = new Scene();
 let camera = new PerspectiveCamera(75, (window.innerWidth)/(window.innerHeight), 0.1, 1000);
 let renderer = new WebGLRenderer({antialias: true, canvas: canvas});
-let controls = new OrbitControls(camera, canvas);
+let controls;
 let light = new AmbientLight(0xFFFFFF,1);
 
 /* simulateStep creates a deep copy of the game board to iterate over each cell and check for living neighbours to check
@@ -133,10 +133,6 @@ let checkCell = function(currX, currY, currZ) {
  * background colour is set to white. The canvas size is set to the window inner sizes with the width - 250 to account
  * for the side panel. The addLights function is called to add 2 PointLights */
 let setupScene = function() {
-	camera.position.z = Math.max(xSize,ySize,zSize) * 2;
-
-	camera.position.x = (xSize - 1) / 2;
-	camera.position.y = (ySize - 1) / 2;
 
 	renderer.setClearColor(backgroundColour);
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -315,7 +311,7 @@ let enableOrbit = function() {
 	// Enable orbit controls
 	document.removeEventListener("keydown", arrowKeyCameraControls);
 	controls.enabled = true;
-	controls.target = (new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0));
+	controls.target = (new Vector3((xSize - 1) / 2, (ySize - 1) / 2, (zSize - 1) / 2));
 	orbitToggle = true;
 	// notify("Orbit controls enabled","success",5000);
 	render();
@@ -413,14 +409,6 @@ let render = function() {
 	renderer.render(scene, camera);
 }
 
-let resetCamera = function() {
-	camera.position.x = (xSize - 1) / 2;
-	camera.position.y = (ySize - 1) / 2;
-	camera.lookAt(new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0))
-
-	camera.updateProjectionMatrix();
-}
-
 /* newGameBoard is called when the user clicks the update button on the side bar. First the inputs are validated and if
  * all values are valid then the scene is disposed using doDispose and the new values are used to create a new scene. */
 let newGameBoard = function(event) {
@@ -480,13 +468,13 @@ let newGameBoard = function(event) {
 
 	newRandomBoard();
 
-	resetCamera();
-
 	updateSidebar();
 	let jsonTextarea = document.getElementById("jsonTextInput");
 	if (jsonTextarea.style.visibility === "visible") {
 		jsonTextarea.value = JSON.stringify(gameArray);
 	}
+
+	camera.lookAt(new Vector3((xSize - 1) / 2, (ySize - 1) / 2, (zSize - 1) / 2));
 
 	if (orbitToggle) {
 		// If orbitToggle is enabled then disable and wait 10ms before enabling, this removes the lag issue after update
@@ -580,41 +568,8 @@ let loadJSON = function() {
 			notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
 		}
 
-		doDispose(scene);
+		newGameFromJSON(parsedInput,timeInput);
 
-
-		if (status === "playing") {
-			stopStart();
-		}
-
-		gameBoard = undefined;
-		gameArray = undefined;
-		gameArray = JSON.parse(input);
-		timeout = 1000 / timeInput;
-		iterations = 0;
-
-		xSize = gameArray.length;
-		ySize = gameArray[0].length;
-		zSize = gameArray[0][0].length;
-
-		scene = new Scene();
-
-		setupScene();
-
-		newBoardFromJSON();
-
-		resetCamera();
-
-		updateSidebar();
-
-		if (orbitToggle) {
-			// If orbitToggle is enabled then disable and wait 10ms before enabling, this removes the lag issue after update
-			disableOrbit();
-			setTimeout(enableOrbit, 10);
-		} else {
-			render();
-		}
-		updateColours();
 	} catch (e) {
 		notify("ERROR: incorrect JSON", "error", 3000);
 	}
@@ -664,10 +619,20 @@ newRandomBoard();
 
 
 let existingOnload = window.onload;
-window.onload = function(){
+window.onload = function() {
 	// If a function is already assigned to window.onload then execute that first, then run code below
 	// This ensures no conflicts with settingsPanel onload function
 	if(typeof(existingOnload) == "function"){ existingOnload(); }
+	camera.position.z = Math.max(xSize,ySize,zSize) * 1.5;
+
+	camera.position.x = xSize * 1.5;
+	camera.position.y = ySize * 1.5;
+
+	controls = new OrbitControls(camera, canvas);
+
+	controls.target = new Vector3((xSize - 1) / 2, (ySize - 1) / 2, (zSize - 1) / 2);
+
+	camera.updateProjectionMatrix();
 	orbitCheckbox = document.getElementById("orbitControls");
 	orbitCheckbox.checked = true;
 	attachClickEvents();
