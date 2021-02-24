@@ -25,6 +25,7 @@ let resizeTimer = false;
 
 let gameBoard;
 let gameArray;
+let startingArray;
 
 let liveCellColour = "#c24d2c";
 let deadCellColour = "#d9dad7";
@@ -148,12 +149,15 @@ let newRandomBoard = function() {
 	document.getElementById("stopStart").innerText = "Start";
 	gameBoard = new Array(xSize);
 	gameArray = new Array(xSize);
+	startingArray = new Array(xSize);
 	for (let i = 0; i < xSize; i++) {
 		gameBoard[i] = new Array(ySize);
 		gameArray[i] = new Array(ySize);
+		startingArray[i] = new Array(ySize);
 		for (let j = 0; j < ySize; j++) {
 			gameBoard[i][j] = new Array(zSize);
 			gameArray[i][j] = new Array(zSize);
+			startingArray[i][j] = new Array(zSize);
 		}
 	}
 
@@ -194,6 +198,7 @@ let addMesh = function(state, i, j, k) {
 	let mesh = new Mesh(geometry, material);
 	mesh.position.set(i,j,k);
 	gameArray[i][j][k] = state;
+	startingArray[i][j][k] = state;
 	gameBoard[i][j][k] = mesh;
 	scene.add(gameBoard[i][j][k]);
 }
@@ -204,11 +209,16 @@ let attachClickEvents = function() {
 	let element = document.getElementById("stopStart");
 	element.addEventListener("click", stopStart);
 
+	element = document.getElementById("step");
+	element.addEventListener("click", step);
+
+	element = document.getElementById("reset");
+	element.addEventListener("click", gameReset);
+
 	element = document.querySelector("#submit");
 	element.addEventListener("click", newGameBoard);
 
-	element = document.getElementById("step");
-	element.addEventListener("click", step);
+
 
 	orbitCheckbox.addEventListener("change", toggleOrbitControls);
 
@@ -276,6 +286,21 @@ let step = function() {
 		simulateStep();
 		updateSidebar();
 	}
+}
+
+let gameReset = function() {
+	let timeInput = document.getElementById("timeoutInput").value;
+
+	if (timeInput < 0.1) {
+		notify("speed must be 0.1 or more", "error", 5000);
+		return false;
+	}
+
+	if (timeInput > 10) {
+		notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
+	}
+
+	newGameFromJSON(startingArray,timeInput);
 }
 
 /* The orbit controls can be disabled using this function. It sets controls.enabled and orbitToggle to false and adds
@@ -405,7 +430,7 @@ let newGameBoard = function(event) {
 	let inputZ = document.getElementById("zSizeInput").value;
 	let timeInput = document.getElementById("timeoutInput").value;
 
-	if (inputX === "" || inputY === "" || timeInput === "") {
+	if (inputX === "" || inputY === "" || inputZ === "" || timeInput === "") {
 		notify("Dimensions or rate cannot be empty", "error", 5000);
 		return false;
 	}
@@ -595,6 +620,45 @@ let loadJSON = function() {
 	}
 }
 
+let newGameFromJSON = function(jsonArray,timeInput) {
+	doDispose(scene);
+
+
+	if (status === "playing") {
+		stopStart();
+	}
+
+	gameBoard = undefined;
+	gameArray = undefined;
+	gameArray = $.extend(true, [], jsonArray);
+	startingArray = $.extend(true, [], jsonArray);
+	timeout = 1000 / timeInput;
+	iterations = 0;
+
+	xSize = gameArray.length;
+	ySize = gameArray[0].length;
+	zSize = gameArray[0][0].length;
+
+	scene = new Scene();
+
+	setupScene();
+
+	newBoardFromJSON();
+
+	updateSidebar();
+
+	camera.lookAt(new Vector3((xSize - 1) / 2, (ySize - 1) / 2, (zSize - 1) / 2));
+
+	if (orbitToggle) {
+		// If orbitToggle is enabled then disable and wait 10ms before enabling, this removes the lag issue after update
+		disableOrbit();
+		setTimeout(enableOrbit, 10);
+	} else {
+		render();
+	}
+	updateColours();
+}
+
 setupScene();
 newRandomBoard();
 
@@ -608,7 +672,6 @@ window.onload = function(){
 	orbitCheckbox.checked = true;
 	attachClickEvents();
 
-	// interval = setInterval(simulateStep, timeout);
 	document.getElementById("stopStart").innerText = "Start";
 	status = "stopped";
 	updateSidebar();
