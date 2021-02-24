@@ -524,7 +524,7 @@ function showHideJSON() {
 		jsonBtn.innerText = "hide JSON";
 		jsonLoadBtn.style.visibility = "visible";
 		jsonLoadBtn.style.display = "block";
-		settingsPanel.style.height = "600px";
+		settingsPanel.style.height = "630px";
 		jsonTextarea.value = JSON.stringify(gameArray);
 	} else {
 		jsonTextarea.style.height = "0px";
@@ -532,7 +532,7 @@ function showHideJSON() {
 		jsonBtn.innerText = "show JSON";
 		jsonLoadBtn.style.visibility = "hidden";
 		jsonLoadBtn.style.display = "none";
-		settingsPanel.style.height = "390px";
+		settingsPanel.style.height = "420px";
 	}
 }
 
