@@ -11,4 +11,13 @@ When I want to deploy to the server (usually after merging a feature branch with
 Hopefully, if all is completed correctly, you should see the 3D Game of Life webpage!
 
 ## Font: Cascadia Code
-The preferred font used for the site is Cascadia Code (https://github.com/microsoft/cascadia-code) and is free to use under the SIL Open Font Licence 1.1 (https://scripts.sil.org/cms/scripts/page.php?item_id=OFL). 
+The preferred font used for the site is Cascadia Code (https://github.com/microsoft/cascadia-code) and is free to use under the SIL Open Font Licence 1.1 (https://scripts.sil.org/cms/scripts/page.php?item_id=OFL).
+
+## Presets and Rules
+As of v 1.2, there are 3 preset options:
+1. Custom (This is the standard random starting config with dimensions and speed user specified)
+2. Blinker B45/S5 (This was implemented based on http://rbeaulieu.github.io/3DGameOfLife/)
+2. Accordion Replicator B45/S5 (This was implemented based on http://rbeaulieu.github.io/3DGameOfLife/)
+
+I want it to be clear that The Blinker and Accordion preset configurations were not discovered by me, I found them from Raphael Beaulieu's and Elliot Coy's 3D Game of life linked above.
+I used these for testing (this was the first time that I could consistently test the same game grid in code) and I can proudly say that my implementation works as expected.
