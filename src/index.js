@@ -213,9 +213,10 @@ let attachClickEvents = function() {
 	element = document.querySelector("#submit");
 	element.addEventListener("click", newGameBoard);
 
-
-
 	orbitCheckbox.addEventListener("change", toggleOrbitControls);
+
+	element = document.getElementById("presets");
+	element.addEventListener("change", presetSelect);
 
 	element = document.getElementById("xSizeInput");
 	element.value = xSize;
@@ -257,6 +258,17 @@ let resizeWindow = function() {
  * setInterval nad clearInterval, updating the sidebar and button text in the process */
 let stopStart = function() {
 	if (status === "stopped") {
+		let timeInput = document.getElementById("timeoutInput").value;
+
+		if (timeInput < 0.1) {
+			notify("speed must be 0.1 or more", "error", 5000);
+			return false;
+		}
+
+		if (timeInput > 10) {
+			notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
+		}
+		timeout = 1000 / timeInput;
 		interval = setInterval(simulateStep, timeout);
 		document.getElementById("stopStart").innerText = "Stop";
 		status = "playing";
@@ -427,7 +439,6 @@ let newGameBoard = function(event) {
 		return false;
 	}
 
-
 	if (timeInput < 0.1) {
 		notify("speed must be 0.1 or more", "error", 5000);
 		return false;
@@ -510,6 +521,85 @@ let doDispose = function(obj) {
 		}
 	}
 	obj = undefined;
+}
+
+let presetSelect = function() {
+	let preset = document.getElementById("presets").value;
+	let updateBtn = document.getElementById("submit");
+
+	let dimensionInputs = document.getElementsByClassName("inputField");
+
+	switch (preset) {
+		case "Random": {
+			for (let i = 0; i < dimensionInputs.length; i++) {
+				dimensionInputs[i].disabled = false;
+			}
+
+			updateBtn.disabled = false;
+
+			break;
+		}
+		case "Blinker B45/S5": {
+			for (let i = 0; i < dimensionInputs.length; i++) {
+				dimensionInputs[i].disabled = true;
+			}
+
+			updateBtn.disabled = true;
+
+			let blinkerArray = [[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
+													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
+													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,1,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
+													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,1,0,0,0],[0,0,1,1,1,0,0],[0,0,0,1,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
+													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,1,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
+													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
+													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]]];
+
+			let timeInput = document.getElementById("timeoutInput").value;
+
+			if (timeInput < 0.1) {
+				notify("speed must be 0.1 or more", "error", 5000);
+				break;
+			}
+
+			if (timeInput > 10) {
+				notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
+			}
+
+			newGameFromJSON(blinkerArray,timeInput);
+			break;
+		}
+		case "Accordion Replicator B45/S5": {
+			for (let i = 0; i < dimensionInputs.length; i++) {
+				dimensionInputs[i].disabled = true;
+			}
+
+			updateBtn.disabled = true;
+
+			let accordionArray = [[[0,0,0],[0,0,0],[0,0,0]],
+														[[0,0,0],[0,0,0],[0,0,0]],
+														[[0,0,0],[0,0,0],[0,0,0]],
+														[[0,0,0],[0,0,0],[0,0,0]],
+														[[0,1,0],[1,1,1],[0,1,0]],
+														[[0,0,0],[0,0,0],[0,0,0]],
+														[[0,0,0],[0,0,0],[0,0,0]],
+														[[0,0,0],[0,0,0],[0,0,0]],
+														[[0,0,0],[0,0,0],[0,0,0]]];
+
+			let timeInput = document.getElementById("timeoutInput").value;
+
+			if (timeInput < 0.1) {
+				notify("speed must be 0.1 or more", "error", 5000);
+				break;
+			}
+
+			if (timeInput > 10) {
+				notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
+			}
+
+			newGameFromJSON(accordionArray,timeInput);
+			break;
+		}
+	}
 }
 
 function showHideJSON() {

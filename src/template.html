@@ -21,6 +21,12 @@
 		<input class="orbitBox" type="checkbox" id="orbitControls"/><br>
 	</div>
 
+	<select id="presets" name="presets" class="presets">
+		<option value="Random">Random (set dimensions below)</option>
+		<option value="Blinker B45/S5">Blinker B45/S5</option>
+		<option value="Accordion Replicator B45/S5">Accordion Replicator B45/S5</option>
+	</select>
+
 	<form class="inputForm">
 		<div class="Inputs">
 			<label class="inputLabel" for="xSizeInput">x Size:</label>
@@ -39,7 +45,7 @@
 		<br>
 		<div class="Inputs">
 			<label class="inputLabel" for="timeoutInput">Speed:</label>
-			<input class="inputField" type="number" id="timeoutInput" min="0.1" step="0.1" required>
+			<input class="timeInput" type="number" id="timeoutInput" min="0.1" step="0.1" required>
 		</div>
 
 		<div class="submitValues">
