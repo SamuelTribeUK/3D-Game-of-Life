@@ -17,9 +17,9 @@ module.exports = {
 				use: ['style-loader', 'css-loader'],
 			},
 			{
-				test: /\.(woff|woff2)$/,
+				test: /\.(ttf)$/,
 				use: {
-					loader: 'url-loader',
+					loader: 'file-loader',
 				},
 			},
 		],
