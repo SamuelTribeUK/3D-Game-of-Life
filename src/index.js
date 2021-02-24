@@ -292,7 +292,7 @@ let enableOrbit = function() {
 	controls.enabled = true;
 	controls.target = (new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0));
 	orbitToggle = true;
-	notify("Orbit controls enabled","success",5000);
+	// notify("Orbit controls enabled","success",5000);
 	render();
 }
 
@@ -460,7 +460,7 @@ let newGameBoard = function(event) {
 	updateSidebar();
 	let jsonTextarea = document.getElementById("jsonTextInput");
 	if (jsonTextarea.style.visibility === "visible") {
-		jsonTextarea.textContent = JSON.stringify(gameArray);
+		jsonTextarea.value = JSON.stringify(gameArray);
 	}
 
 	if (orbitToggle) {
@@ -526,7 +526,6 @@ function showHideJSON() {
 
 let loadJSON = function() {
 	let input = document.getElementById("jsonTextInput").value;
-	console.log(input);
 	try {
 		let parsedInput = JSON.parse(input);
 		let incorrectFormat = false;
