@@ -49,7 +49,6 @@ let light = new AmbientLight(0xFFFFFF,1);
  * the board has been checked, if no cells have changed then the game is stopped. The side bar and cube colours are then
  * updated with their respective functions */
 let simulateStep = function() {
-	console.log("simulate step called");
 	let newGameArray = $.extend(true, [], gameArray);
 
 	let changed = false;
