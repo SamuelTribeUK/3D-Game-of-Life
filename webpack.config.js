@@ -16,6 +16,12 @@ module.exports = {
 				test: /\.css$/i,
 				use: ['style-loader', 'css-loader'],
 			},
+			{
+				test: /\.(woff|woff2)$/,
+				use: {
+					loader: 'url-loader',
+				},
+			},
 		],
 	},
 	plugins: [
