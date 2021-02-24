@@ -1,5 +1,13 @@
+@font-face {
+    font-family: Cascadia-Code;
+    font-style: normal;
+    font-weight: normal;
+    src: url('./assets/fonts/CascadiaCode.ttf') format('truetype');
+}
+
 * {
-    font-family: "Cascadia Code", serif;
+    font-family: Cascadia-Code, sans-serif;
+    line-height: 1.2;
 }
 
 body {
@@ -21,7 +29,7 @@ label {
 
 h1 {
     color: #f0f0f0;
-    font-size: 28px;
+    font-size: 20px;
     margin-top: 0;
     margin-bottom: 5px;
     text-align: center;
@@ -29,7 +37,7 @@ h1 {
 
 /* The side panel menu */
 .settingsPanel {
-    height: 390px;
+    height: auto;
     width: 0; /* 0 width - change this with JavaScript */
     position: absolute; /* Stay in place */
     z-index: 2; /* Stay on top */
@@ -39,17 +47,19 @@ h1 {
     box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     overflow: hidden;
     padding-top: 10px;
+    padding-bottom: 10px;
     transition: 0.15s;
 }
 
 .gameInfo p, a {
-    font-size: 16px;
+    font-size: 14px;
     color: #f0f0f0;
     transition: 0.3s;
 }
 
 .inputForm label {
-    font-size: 16px;
+    font-size: 14px;
+    height: auto;
     float: left;
     display: block;
     transition: 0.3s;
@@ -73,13 +83,14 @@ h1 {
     position: absolute;
     top: 0;
     right: 10px;
-    font-size: 36px;
+    font-size: 30px;
     margin-left: 50px;
 }
 
 .jsonBtn, .jsonTextInput, .jsonLoadBtn {
     margin-top: 5px;
     width: 100%;
+    height: auto;
     border: 0.1em solid #f0f0f0;
     border-radius: 0.12em;
     box-sizing: border-box;
@@ -132,10 +143,11 @@ h1 {
 .updateButton {
     margin-top: 5px;
     width: 100%;
+    height: auto;
     border: 0.1em solid #f0f0f0;
     border-radius: 0.12em;
     box-sizing: border-box;
-    font-size: 25px;
+    font-size: 15px;
     text-decoration: none;
     text-align: center;
     transition: all 0.2s;
@@ -146,7 +158,8 @@ input[type="number"] {
 }
 
 .stopStart, .step, .reset {
-    font-size: 16px;
+    font-size: 15px;
+    height: min-content;
     border: 0.1em solid #f0f0f0;
     border-radius: 0.12em;
     box-sizing: border-box;
