@@ -57,17 +57,23 @@ h1 {
     transition: 0.3s;
 }
 
-.inputForm label {
-    font-size: 14px;
+.inputForm .inputLabel {
+    font-size: 15px;
     height: auto;
+    margin-right: 80px;
     float: left;
     display: block;
     transition: 0.3s;
 }
 
+.timeoutInputLabel {
+    margin-right: 85px;
+}
+
 .inputForm input[type="number"] {
+    display: block;
     float: right;
-    height: 11px;
+    height: 13px;
 }
 
 .closebtn {
@@ -85,6 +91,10 @@ h1 {
     right: 10px;
     font-size: 30px;
     margin-left: 50px;
+}
+
+.Inputs {
+    display: inline-block;
 }
 
 .jsonBtn, .jsonTextInput, .jsonLoadBtn {
@@ -180,4 +190,31 @@ input[type="number"] {
     color: #f0f0f0;
     margin-top: 5px;
     text-align: center;
+}
+
+.presetsLabel, .rulesLabel {
+    font-size: 13px;
+    height: auto;
+    float: left;
+    display: block;
+    transition: 0.3s;
+    margin-bottom: 4px;
+}
+
+.rulesLabel {
+    display: block;
+}
+
+.presets {
+    width: 130px;
+    height: 20px;
+    font-size: 10px;
+    float: right;
+}
+
+.rules {
+    width: 130px;
+    height: 20px;
+    font-size: 11px;
+    float: right;
 }
