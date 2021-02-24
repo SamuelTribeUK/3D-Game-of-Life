@@ -7,9 +7,11 @@
 </head>
 <body>
 <div id="settingsPanel" class="settingsPanel">
+	<h1>Settings</h1>
 	<a id="closebtn" href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
 	<button class="stopStart" id="stopStart">Start</button>
 	<button class="step" id="step">Step</button>
+	<button class="reset" id="reset">Reset</button>
 	<div class="gameInfo">
 		<p id="status"></p>
 		<p id="iterations"></p>
@@ -44,6 +46,9 @@
 			<input class="updateButton" type="submit" id="submit" value="Update">
 		</div>
 	</form>
+	<button class="jsonBtn" id="jsonBtn">show JSON</button>
+	<textarea class="jsonTextInput" id="jsonTextInput"></textarea>
+	<button class="jsonLoadBtn" id="jsonLoadBtn">Load JSON game</button>
 	<div class="generalInfo">
 		<p>This is a 3D implementation of <br> <a href="https://conwaylife.com/wiki/Main_Page" target="_blank">Conway's Game of Life</a></p>
 		<br>

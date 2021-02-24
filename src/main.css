@@ -19,9 +19,17 @@ label {
     color: #f0f0f0;
 }
 
+h1 {
+    color: #f0f0f0;
+    font-size: 28px;
+    margin-top: 0;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
 /* The side panel menu */
 .settingsPanel {
-    height: 340px;
+    height: 390px;
     width: 0; /* 0 width - change this with JavaScript */
     position: absolute; /* Stay in place */
     z-index: 2; /* Stay on top */
@@ -30,7 +38,7 @@ label {
     background: linear-gradient(to top right, #8A261C, #B2482E);
     box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     overflow: hidden;
-    padding-top: 20px;
+    padding-top: 10px;
     transition: 0.15s;
 }
 
@@ -67,6 +75,32 @@ label {
     right: 10px;
     font-size: 36px;
     margin-left: 50px;
+}
+
+.jsonBtn, .jsonTextInput, .jsonLoadBtn {
+    margin-top: 5px;
+    width: 100%;
+    border: 0.1em solid #f0f0f0;
+    border-radius: 0.12em;
+    box-sizing: border-box;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.jsonBtn {
+    font-size: 15px;
+}
+
+.jsonTextInput {
+    font-size: 8px;
+    visibility: hidden;
+}
+
+.jsonLoadBtn {
+    margin-top: 0;
+    visibility: hidden;
+    display: none;
 }
 
 .openbtn {
@@ -111,17 +145,18 @@ input[type="number"] {
     width: 50px;
 }
 
-.stopStart, .step {
-    font-size: 20px;
+.stopStart, .step, .reset {
+    font-size: 16px;
     border: 0.1em solid #f0f0f0;
     border-radius: 0.12em;
     box-sizing: border-box;
+    display: inline-block;
     text-decoration: none;
     text-align: center;
     transition: all 0.2s;
 }
 
-.stopStart:hover, .step:hover, .updateButton:hover {
+.stopStart:hover, .step:hover, .updateButton:hover, .jsonBtn:hover, .jsonLoadBtn:hover, .reset:hover {
     border-color: #1a2639;
     color: #f0f0f0;
     background-color: #1a2639;

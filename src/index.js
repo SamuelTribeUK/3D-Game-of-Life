@@ -24,6 +24,8 @@ let orbitCheckbox;
 let resizeTimer = false;
 
 let gameBoard;
+let gameArray;
+let startingArray;
 
 let liveCellColour = "#c24d2c";
 let deadCellColour = "#d9dad7";
@@ -39,7 +41,7 @@ const canvas = document.querySelector('canvas');
 let scene = new Scene();
 let camera = new PerspectiveCamera(75, (window.innerWidth)/(window.innerHeight), 0.1, 1000);
 let renderer = new WebGLRenderer({antialias: true, canvas: canvas});
-let controls = new OrbitControls(camera, canvas);
+let controls;
 let light = new AmbientLight(0xFFFFFF,1);
 
 /* simulateStep creates a deep copy of the game board to iterate over each cell and check for living neighbours to check
@@ -48,7 +50,7 @@ let light = new AmbientLight(0xFFFFFF,1);
  * updated with their respective functions */
 let simulateStep = function() {
 	console.log("simulate step called");
-	let newGameBoard = $.extend(true, [], gameBoard);
+	let newGameArray = $.extend(true, [], gameArray);
 
 	let changed = false;
 
@@ -66,34 +68,34 @@ let simulateStep = function() {
 					}
 				}
 				// B3/S23 (Standard 2D GoL)
-				if ((liveNum === 3) && gameBoard[i][j][k].state === 0) {
-					changed = true;
-					newGameBoard[i][j][k].state = 1;
-				} else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
-					changed = true;
-					newGameBoard[i][j][k].state = 0;
-				}
-
-				// B45/S5
-				// if ((liveNum === 4 || liveNum === 5) && gameBoard[i][j][k].state === 0) {
+				// if ((liveNum === 3) && gameArray[i][j][k] === 0) {
 				// 	changed = true;
-				// 	newGameBoard[i][j][k].state = 1;
-				// } else if (!(liveNum === 5) && gameBoard[i][j][k].state === 1) {
-				// 	newGameBoard[i][j][k].state = 0;
+				// 	newGameArray[i][j][k] = 1;
+				// } else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
+				// 	changed = true;
+				// 	newGameArray[i][j][k] = 0;
 				// }
 
+				// B45/S5
+				if ((liveNum === 4 || liveNum === 5) && gameArray[i][j][k] === 0) {
+					changed = true;
+					newGameArray[i][j][k] = 1;
+				} else if (!(liveNum === 5) && gameArray[i][j][k] === 1) {
+					newGameArray[i][j][k] = 0;
+				}
+
 				// B36/S23 (2D Highlife)
-				// if ((liveNum === 3 || liveNum === 6) && gameBoard[i][j][k].state === 0) {
+				// if ((liveNum === 3 || liveNum === 6) && gameArray[i][j][k] === 0) {
 				// 	changed = true;
-				// 	newGameBoard[i][j][k].state = 1;
-				// } else if (!(liveNum === 2 || liveNum === 3) && gameBoard[i][j][k].state === 1) {
+				// 	newGameArray[i][j][k] = 1;
+				// } else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
 				// 	changed = true;
-				// 	newGameBoard[i][j][k].state = 0;
+				// 	newGameArray[i][j][k] = 0;
 				// }
 			}
 		}
 	}
-	gameBoard = $.extend(true, [], newGameBoard);
+	gameArray = $.extend(true, [], newGameArray);
 
 	iterations += 1;
 
@@ -120,7 +122,7 @@ let checkCell = function(currX, currY, currZ) {
 		return 0;
  	} else if (currZ < 0 || currZ >= zSize) {
 		return 0;
-	} else if (gameBoard[currX][currY][currZ].state === 1) {
+	} else if (gameArray[currX][currY][currZ] === 1) {
 		return 1;
 	} else {
 		return 0;
@@ -131,10 +133,6 @@ let checkCell = function(currX, currY, currZ) {
  * background colour is set to white. The canvas size is set to the window inner sizes with the width - 250 to account
  * for the side panel. The addLights function is called to add 2 PointLights */
 let setupScene = function() {
-	camera.position.z = Math.max(xSize,ySize,zSize) * 2;
-
-	camera.position.x = (xSize - 1) / 2;
-	camera.position.y = (ySize - 1) / 2;
 
 	renderer.setClearColor(backgroundColour);
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -143,13 +141,19 @@ let setupScene = function() {
 }
 
 // Initialise the 3D array game board with the specified x, y and z sizes and populate it with random cells
-let initialiseBoard = function() {
+let newRandomBoard = function() {
 	document.getElementById("stopStart").innerText = "Start";
 	gameBoard = new Array(xSize);
+	gameArray = new Array(xSize);
+	startingArray = new Array(xSize);
 	for (let i = 0; i < xSize; i++) {
 		gameBoard[i] = new Array(ySize);
+		gameArray[i] = new Array(ySize);
+		startingArray[i] = new Array(ySize);
 		for (let j = 0; j < ySize; j++) {
 			gameBoard[i][j] = new Array(zSize);
+			gameArray[i][j] = new Array(zSize);
+			startingArray[i][j] = new Array(zSize);
 		}
 	}
 
@@ -158,6 +162,20 @@ let initialiseBoard = function() {
 			for (let k = 0; k < zSize; k++) {
 				let state = Math.floor(Math.random() * 2);
 				addMesh(state, i, j, k);
+			}
+		}
+	}
+}
+
+let newBoardFromJSON = function() {
+	document.getElementById("stopStart").innerText = "Start";
+	gameBoard = new Array(xSize);
+	for (let i = 0; i < xSize; i++) {
+		gameBoard[i] = new Array(ySize);
+		for (let j = 0; j < ySize; j++) {
+			gameBoard[i][j] = new Array(zSize);
+			for (let k = 0; k < zSize; k++) {
+				addMesh(gameArray[i][j][k],i,j,k);
 			}
 		}
 	}
@@ -175,8 +193,10 @@ let addMesh = function(state, i, j, k) {
 	let material = new MeshLambertMaterial({color: colour, opacity: opacity, transparent: true});
 	let mesh = new Mesh(geometry, material);
 	mesh.position.set(i,j,k);
-	gameBoard[i][j][k] = {box: mesh, state: state};
-	scene.add(gameBoard[i][j][k].box);
+	gameArray[i][j][k] = state;
+	startingArray[i][j][k] = state;
+	gameBoard[i][j][k] = mesh;
+	scene.add(gameBoard[i][j][k]);
 }
 
 /* The functions that handle all buttons and inputs on the side panel are attached in this function, as well as the
@@ -185,11 +205,16 @@ let attachClickEvents = function() {
 	let element = document.getElementById("stopStart");
 	element.addEventListener("click", stopStart);
 
+	element = document.getElementById("step");
+	element.addEventListener("click", step);
+
+	element = document.getElementById("reset");
+	element.addEventListener("click", gameReset);
+
 	element = document.querySelector("#submit");
 	element.addEventListener("click", newGameBoard);
 
-	element = document.getElementById("step");
-	element.addEventListener("click", step);
+
 
 	orbitCheckbox.addEventListener("change", toggleOrbitControls);
 
@@ -206,6 +231,9 @@ let attachClickEvents = function() {
 	let rate = 1000 / timeout;
 	element.value = rate.toFixed(1);
 
+	document.getElementById("jsonBtn").onclick = showHideJSON;
+	document.getElementById("jsonLoadBtn").onclick = loadJSON;
+
 	// Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
 	window.addEventListener("resize", () => {
 		if (resizeTimer) {
@@ -214,7 +242,7 @@ let attachClickEvents = function() {
 		resizeTimer = setTimeout(resizeWindow, 100);
 	});
 
-	document.addEventListener("keydown", arrowKeyCameraControls);
+	// document.addEventListener("keydown", arrowKeyCameraControls);
 }
 
 // Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
@@ -256,6 +284,21 @@ let step = function() {
 	}
 }
 
+let gameReset = function() {
+	let timeInput = document.getElementById("timeoutInput").value;
+
+	if (timeInput < 0.1) {
+		notify("speed must be 0.1 or more", "error", 5000);
+		return false;
+	}
+
+	if (timeInput > 10) {
+		notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
+	}
+
+	newGameFromJSON(startingArray,timeInput);
+}
+
 /* The orbit controls can be disabled using this function. It sets controls.enabled and orbitToggle to false and adds
  * arrow key event listeners for the standard camera controls */
 let disableOrbit = function() {
@@ -268,9 +311,9 @@ let enableOrbit = function() {
 	// Enable orbit controls
 	document.removeEventListener("keydown", arrowKeyCameraControls);
 	controls.enabled = true;
-	controls.target = (new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0));
+	controls.target = (new Vector3((xSize - 1) / 2, (ySize - 1) / 2, (zSize - 1) / 2));
 	orbitToggle = true;
-	notify("Orbit controls enabled","success",5000);
+	// notify("Orbit controls enabled","success",5000);
 	render();
 }
 
@@ -334,15 +377,15 @@ let updateColours = function() {
 	for (let i = 0; i < xSize; i++) {
 		for (let j = 0; j < ySize; j++) {
 			for (let k = 0; k < zSize; k++) {
-				state = gameBoard[i][j][k].state;
+				state = gameArray[i][j][k];
 				opacity = 1;
 				colour = liveCellColour;
 				if (state === 0) {
 					opacity = 0.1;
 					colour = deadCellColour;
 				}
-				gameBoard[i][j][k].box.material.opacity = (opacity);
-				gameBoard[i][j][k].box.material.color.set(colour);
+				gameBoard[i][j][k].material.opacity = (opacity);
+				gameBoard[i][j][k].material.color.set(colour);
 			}
 		}
 	}
@@ -352,6 +395,9 @@ let updateColours = function() {
 let updateSidebar = function() {
 	document.getElementById("status").innerText = "Status: " + status;
 	document.getElementById("iterations").innerText = "Iterations: " + iterations;
+	document.getElementById("xSizeInput").value = xSize.toString();
+	document.getElementById("ySizeInput").value = ySize.toString();
+	document.getElementById("zSizeInput").value = zSize.toString();
 }
 
 /* render renders the objects in the scene in accordance to the camera location. If orbit controls are enabled then an
@@ -372,7 +418,7 @@ let newGameBoard = function(event) {
 	let inputZ = document.getElementById("zSizeInput").value;
 	let timeInput = document.getElementById("timeoutInput").value;
 
-	if (inputX === "" || inputY === "" || timeInput === "") {
+	if (inputX === "" || inputY === "" || inputZ === "" || timeInput === "") {
 		notify("Dimensions or rate cannot be empty", "error", 5000);
 		return false;
 	}
@@ -413,21 +459,22 @@ let newGameBoard = function(event) {
 	}
 
 	gameBoard = null;
+	gameArray = null;
 	iterations = 0;
 
 	scene = new Scene();
 
 	setupScene();
 
-	initialiseBoard();
-
-	camera.position.x = (xSize - 1) / 2;
-	camera.position.y = (ySize - 1) / 2;
-	camera.lookAt(new Vector3((xSize - 1) / 2, (ySize - 1) / 2, 0))
-
-	camera.updateProjectionMatrix();
+	newRandomBoard();
 
 	updateSidebar();
+	let jsonTextarea = document.getElementById("jsonTextInput");
+	if (jsonTextarea.style.visibility === "visible") {
+		jsonTextarea.value = JSON.stringify(gameArray);
+	}
+
+	camera.lookAt(new Vector3((xSize - 1) / 2, (ySize - 1) / 2, (zSize - 1) / 2));
 
 	if (orbitToggle) {
 		// If orbitToggle is enabled then disable and wait 10ms before enabling, this removes the lag issue after update
@@ -466,22 +513,132 @@ let doDispose = function(obj) {
 	obj = undefined;
 }
 
+function showHideJSON() {
+	let jsonTextarea = document.getElementById("jsonTextInput");
+	let jsonBtn = document.getElementById("jsonBtn");
+	let settingsPanel = document.getElementById("settingsPanel");
+	let jsonLoadBtn = document.getElementById("jsonLoadBtn");
+
+	if (jsonBtn.innerText === "show JSON") {
+		jsonTextarea.style.height = "200px";
+		jsonTextarea.style.visibility = "visible";
+		jsonBtn.innerText = "hide JSON";
+		jsonLoadBtn.style.visibility = "visible";
+		jsonLoadBtn.style.display = "block";
+		settingsPanel.style.height = "600px";
+		jsonTextarea.value = JSON.stringify(gameArray);
+	} else {
+		jsonTextarea.style.height = "0px";
+		jsonTextarea.style.visibility = "hidden";
+		jsonBtn.innerText = "show JSON";
+		jsonLoadBtn.style.visibility = "hidden";
+		jsonLoadBtn.style.display = "none";
+		settingsPanel.style.height = "390px";
+	}
+}
+
+let loadJSON = function() {
+	let input = document.getElementById("jsonTextInput").value;
+	try {
+		let parsedInput = JSON.parse(input);
+		let incorrectFormat = false;
+		for (let i = 0; i < parsedInput.length; i++) {
+			if (parsedInput[i].length !== parsedInput[0].length) {
+				incorrectFormat = true;
+			}
+			for (let j = 0; j < parsedInput[0].length; j++) {
+				if (parsedInput[i][j].length !== parsedInput[0][0].length) {
+					incorrectFormat = true;
+				}
+			}
+		}
+
+		if (incorrectFormat) {
+			notify("ERROR: incorrect JSON Array format","error",3000);
+		}
+
+		let timeInput = document.getElementById("timeoutInput").value;
+
+		if (timeInput < 0.1) {
+			notify("speed must be 0.1 or more", "error", 5000);
+			return false;
+		}
+
+		if (timeInput > 10) {
+			notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
+		}
+
+		newGameFromJSON(parsedInput,timeInput);
+
+	} catch (e) {
+		notify("ERROR: incorrect JSON", "error", 3000);
+	}
+}
+
+let newGameFromJSON = function(jsonArray,timeInput) {
+	doDispose(scene);
+
+
+	if (status === "playing") {
+		stopStart();
+	}
+
+	gameBoard = undefined;
+	gameArray = undefined;
+	gameArray = $.extend(true, [], jsonArray);
+	startingArray = $.extend(true, [], jsonArray);
+	timeout = 1000 / timeInput;
+	iterations = 0;
+
+	xSize = gameArray.length;
+	ySize = gameArray[0].length;
+	zSize = gameArray[0][0].length;
+
+	scene = new Scene();
+
+	setupScene();
+
+	newBoardFromJSON();
+
+	updateSidebar();
+
+	camera.lookAt(new Vector3((xSize - 1) / 2, (ySize - 1) / 2, (zSize - 1) / 2));
+
+	if (orbitToggle) {
+		// If orbitToggle is enabled then disable and wait 10ms before enabling, this removes the lag issue after update
+		disableOrbit();
+		setTimeout(enableOrbit, 10);
+	} else {
+		render();
+	}
+	updateColours();
+}
+
 setupScene();
-initialiseBoard();
+newRandomBoard();
 
 
 let existingOnload = window.onload;
-window.onload = function(){
+window.onload = function() {
 	// If a function is already assigned to window.onload then execute that first, then run code below
 	// This ensures no conflicts with settingsPanel onload function
 	if(typeof(existingOnload) == "function"){ existingOnload(); }
+	camera.position.z = Math.max(xSize,ySize,zSize) * 1.5;
+
+	camera.position.x = xSize * 1.5;
+	camera.position.y = ySize * 1.5;
+
+	controls = new OrbitControls(camera, canvas);
+
+	controls.target = new Vector3((xSize - 1) / 2, (ySize - 1) / 2, (zSize - 1) / 2);
+
+	camera.updateProjectionMatrix();
 	orbitCheckbox = document.getElementById("orbitControls");
 	orbitCheckbox.checked = true;
 	attachClickEvents();
 
-	interval = setInterval(simulateStep, timeout);
-	document.getElementById("stopStart").innerText = "Stop";
-	status = "playing";
+	document.getElementById("stopStart").innerText = "Start";
+	status = "stopped";
 	updateSidebar();
 };
 
