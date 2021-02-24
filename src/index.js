@@ -66,31 +66,41 @@ let simulateStep = function() {
 						}
 					}
 				}
-				// B3/S23 (Standard 2D GoL)
-				// if ((liveNum === 3) && gameArray[i][j][k] === 0) {
-				// 	changed = true;
-				// 	newGameArray[i][j][k] = 1;
-				// } else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
-				// 	changed = true;
-				// 	newGameArray[i][j][k] = 0;
-				// }
 
-				// B45/S5
-				if ((liveNum === 4 || liveNum === 5) && gameArray[i][j][k] === 0) {
-					changed = true;
-					newGameArray[i][j][k] = 1;
-				} else if (!(liveNum === 5) && gameArray[i][j][k] === 1) {
-					newGameArray[i][j][k] = 0;
+				let ruleset = document.getElementById("presetRules").value;
+
+				switch (ruleset) {
+					case "Standard": {
+						// B3/S23 (Standard 2D GoL)
+						if ((liveNum === 3) && gameArray[i][j][k] === 0) {
+							changed = true;
+							newGameArray[i][j][k] = 1;
+						} else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
+							changed = true;
+							newGameArray[i][j][k] = 0;
+						}
+						break;
+					} case "B45/S5": {
+						// B45/S5
+						if ((liveNum === 4 || liveNum === 5) && gameArray[i][j][k] === 0) {
+							changed = true;
+							newGameArray[i][j][k] = 1;
+						} else if (!(liveNum === 5) && gameArray[i][j][k] === 1) {
+							newGameArray[i][j][k] = 0;
+						}
+						break;
+					} case "B36/S23": {
+						// B36/S23 (2D Highlife)
+						if ((liveNum === 3 || liveNum === 6) && gameArray[i][j][k] === 0) {
+							changed = true;
+							newGameArray[i][j][k] = 1;
+						} else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
+							changed = true;
+							newGameArray[i][j][k] = 0;
+						}
+						break;
+					}
 				}
-
-				// B36/S23 (2D Highlife)
-				// if ((liveNum === 3 || liveNum === 6) && gameArray[i][j][k] === 0) {
-				// 	changed = true;
-				// 	newGameArray[i][j][k] = 1;
-				// } else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
-				// 	changed = true;
-				// 	newGameArray[i][j][k] = 0;
-				// }
 			}
 		}
 	}
@@ -526,6 +536,7 @@ let doDispose = function(obj) {
 let presetSelect = function() {
 	let preset = document.getElementById("presets").value;
 	let updateBtn = document.getElementById("submit");
+	let rules = document.getElementById("presetRules");
 
 	let dimensionInputs = document.getElementsByClassName("inputField");
 
@@ -534,7 +545,6 @@ let presetSelect = function() {
 			for (let i = 0; i < dimensionInputs.length; i++) {
 				dimensionInputs[i].disabled = false;
 			}
-
 			updateBtn.disabled = false;
 
 			break;
@@ -543,7 +553,7 @@ let presetSelect = function() {
 			for (let i = 0; i < dimensionInputs.length; i++) {
 				dimensionInputs[i].disabled = true;
 			}
-
+			rules.value = "B45/S5";
 			updateBtn.disabled = true;
 
 			let blinkerArray = [[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
@@ -572,6 +582,8 @@ let presetSelect = function() {
 			for (let i = 0; i < dimensionInputs.length; i++) {
 				dimensionInputs[i].disabled = true;
 			}
+
+			rules.value = "B45/S5";
 
 			updateBtn.disabled = true;
 
