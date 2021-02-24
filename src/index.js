@@ -374,9 +374,9 @@ let updateColours = function() {
 let updateSidebar = function() {
 	document.getElementById("status").innerText = "Status: " + status;
 	document.getElementById("iterations").innerText = "Iterations: " + iterations;
-	document.getElementById("xSizeInput").innerText = xSize.toString();
-	document.getElementById("ySizeInput").innerText = ySize.toString();
-	document.getElementById("zSizeInput").innerText = zSize.toString();
+	document.getElementById("xSizeInput").value = xSize.toString();
+	document.getElementById("ySizeInput").value = ySize.toString();
+	document.getElementById("zSizeInput").value = zSize.toString();
 }
 
 /* render renders the objects in the scene in accordance to the camera location. If orbit controls are enabled then an
@@ -513,7 +513,7 @@ function showHideJSON() {
 		jsonLoadBtn.style.visibility = "visible";
 		jsonLoadBtn.style.display = "block";
 		settingsPanel.style.height = "600px";
-		jsonTextarea.value = JSON.stringify(gameArray);;
+		jsonTextarea.value = JSON.stringify(gameArray);
 	} else {
 		jsonTextarea.style.height = "0px";
 		jsonTextarea.style.visibility = "hidden";
@@ -543,7 +543,17 @@ let loadJSON = function() {
 
 		if (incorrectFormat) {
 			notify("ERROR: incorrect JSON Array format","error",3000);
+		}
 
+		let timeInput = document.getElementById("timeoutInput").value;
+
+		if (timeInput < 0.1) {
+			notify("speed must be 0.1 or more", "error", 5000);
+			return false;
+		}
+
+		if (timeInput > 10) {
+			notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
 		}
 
 		doDispose(scene);
@@ -556,6 +566,7 @@ let loadJSON = function() {
 		gameBoard = undefined;
 		gameArray = undefined;
 		gameArray = JSON.parse(input);
+		timeout = 1000 / timeInput;
 		iterations = 0;
 
 		xSize = gameArray.length;
