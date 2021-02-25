@@ -1,4 +1,4 @@
-# 3D-Game-of-Life version 1.2
+# 3D-Game-of-Life version 1.3
 A Web-Based 3D Implementation of John Conway’s Game of Life Cellular Automaton (Final Year Project)
 This is the git repository for my final year university project. This project aims to create a web-based 3D version of the game of life cellular automaton (https://www.conwaylife.com/)
 Version 1.0 allows users to create custom grid sizes and game speeds, stop and start the game, and step through a single iteration. Notifications are displayed using toastify-js when settings are invalid or if the settings might cause lag.
@@ -6,6 +6,8 @@ Version 1.0 allows users to create custom grid sizes and game speeds, stop and s
 Version 1.1 added JSON functionality allowing the game grid to be exported to text in the settings panel and custom game states in JSON Array format can be loaded by pasting it in the JSON textarea on the settings panel.
 
 Version 1.2 added Presets and Rules selection boxes (see heading Presets and Rules below for more info).
+
+Version 1.3 added a toggle box to hide dead cells. This can dramatically improve performance if the majority of cells in the game are dead. Also added a basic wireframe box to represent the boundaries of the grid.
 
 ## How to deploy to the webserver
 After the new configuration changes and new files added in wip-core-server, the project can now be deployed to a web server. For this project, I am using an IONOS VPS running Ubuntu 20.04, I use Nginx configured to use port 3000 as this is the node application port for my project and it is fully configured with SSL and a domain (gol.samueltribe.com).
