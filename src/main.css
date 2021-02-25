@@ -142,12 +142,12 @@ h1 {
     background-color: #444;
 }
 
-.orbitBox {
+.orbitBoxLabel, .hideDeadBoxLabel {
     float: left;
 }
 
-.orbitToggle {
-    display: inline-block;
+.orbitBox, .hideDeadBox {
+    float: right;
 }
 
 .updateButton {
