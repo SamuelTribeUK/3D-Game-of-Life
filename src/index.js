@@ -1,6 +1,9 @@
 import {
 	AmbientLight,
 	BoxGeometry,
+	EdgesGeometry,
+	LineBasicMaterial,
+	LineSegments,
 	Mesh,
 	MeshLambertMaterial,
 	PerspectiveCamera,
@@ -9,10 +12,11 @@ import {
 	WebGLRenderer,
 } from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-let $ = require('jquery/src/core');
 import './main.css';
 import './settingsPanel.js';
 import {notify} from './notification.js';
+
+let $ = require('jquery/src/core');
 
 let xSize = 10;
 let ySize = 10;
@@ -21,6 +25,7 @@ let timeout = 200;
 let orbitToggle = true;
 let warning = false;
 let orbitCheckbox;
+let hideDead = false;
 let resizeTimer = false;
 
 let gameBoard;
@@ -146,6 +151,15 @@ let setupScene = function() {
 	renderer.setClearColor(backgroundColour);
 	renderer.setSize(window.innerWidth, window.innerHeight);
 
+	let geo = new EdgesGeometry(new BoxGeometry(xSize, ySize, zSize));
+	let mat = new LineBasicMaterial( { color: deadCellColour, linewidth: 2 } );
+
+	let wireframe = new LineSegments(geo,mat);
+
+	wireframe.position.set((xSize/2.0) -0.5, (ySize/2.0) -0.5, (zSize/2.0)-0.5);
+
+	scene.add(wireframe);
+
 	scene.add(light);
 }
 
@@ -224,6 +238,9 @@ let attachClickEvents = function() {
 	element.addEventListener("click", newGameBoard);
 
 	orbitCheckbox.addEventListener("change", toggleOrbitControls);
+
+	element = document.getElementById("hideDeadBox");
+	element.addEventListener("click", showHideDeadCells);
 
 	element = document.getElementById("presets");
 	element.addEventListener("change", presetSelect);
@@ -338,6 +355,11 @@ let enableOrbit = function() {
 	render();
 }
 
+let showHideDeadCells = function() {
+	hideDead = document.getElementById("hideDeadBox").value;
+	updateColours();
+}
+
 /* toggleOrbitControls handles the orbit camera controls being enabled/disabled and configures the target of the camera.
  * The arrow key event listeners for the standard camera controls are disabled when enabling orbit controls to avoid
  * conflicts with the existing event listeners included with orbit controls */
@@ -385,13 +407,13 @@ let arrowKeyCameraControls = function(event) {
 				camera.position.y -= 1;
 		}
 	}
-
 	requestAnimationFrame(render);
 }
 
 /* updateColours iterates over the game board and updates the colours of the cubes on the canvas to represent the living
  * and dead cells with green and white respectively */
 let updateColours = function() {
+	let hideDead = document.getElementById("hideDeadBox").checked;
 	let state;
 	let opacity = 1;
 	let colour = liveCellColour;
@@ -401,9 +423,15 @@ let updateColours = function() {
 				state = gameArray[i][j][k];
 				opacity = 1;
 				colour = liveCellColour;
+				gameBoard[i][j][k].visible = true;
 				if (state === 0) {
-					opacity = 0.1;
-					colour = deadCellColour;
+					if (hideDead) {
+						gameBoard[i][j][k].visible = false;
+					} else {
+						opacity = 0.1;
+						colour = deadCellColour;
+						gameBoard[i][j][k].visible = true;
+					}
 				}
 				gameBoard[i][j][k].material.opacity = (opacity);
 				gameBoard[i][j][k].material.color.set(colour);
