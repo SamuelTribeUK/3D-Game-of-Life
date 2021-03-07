@@ -58,91 +58,22 @@ let light = new AmbientLight(0xFFFFFF,1);
 let simulateStep = function() {
 
 	let ruleset = document.getElementById("presetRules").value;
-	let changed = false;
 
 	// If web workers are allowed in the browser then run code on game.worker.js
 	if (window.Worker) {
 
+		// This is just in case the web worker was terminated, a new web worker will be created
+		if (!worker) {
+			console.log("!worker in simulateStep");
+			worker = new Worker();
+		}
+
 		worker.postMessage([gameArray,xSize,ySize,zSize,ruleset]);
 
 	} else {
-		let newGameArray = $.extend(true, [], gameArray);
-
-		for (let i = 0; i < xSize; i++) {
-			for (let j = 0; j < ySize; j++) {
-				for (let k = 0; k < zSize; k++) {
-					let liveNum = 0;
-					for (let l = -1; l < 2; l++) {
-						for (let m = -1; m < 2; m++) {
-							for (let n = -1; n < 2; n++) {
-								if (!((l === 0) && (m === 0) && (n === 0))) {
-									liveNum += checkCell(i+l, j+m, k+n);
-								}
-							}
-						}
-					}
-
-					switch (ruleset) {
-						case "Standard": {
-							// B3/S23 (Standard 2D GoL)
-							if ((liveNum === 3) && gameArray[i][j][k] === 0) {
-								changed = true;
-								newGameArray[i][j][k] = 1;
-							} else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
-								changed = true;
-								newGameArray[i][j][k] = 0;
-							}
-							break;
-						} case "B45/S5": {
-							// B45/S5
-							if ((liveNum === 4 || liveNum === 5) && gameArray[i][j][k] === 0) {
-								changed = true;
-								newGameArray[i][j][k] = 1;
-							} else if (!(liveNum === 5) && gameArray[i][j][k] === 1) {
-								newGameArray[i][j][k] = 0;
-							}
-							break;
-						} case "B36/S23": {
-							// B36/S23 (2D Highlife)
-							if ((liveNum === 3 || liveNum === 6) && gameArray[i][j][k] === 0) {
-								changed = true;
-								newGameArray[i][j][k] = 1;
-							} else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
-								changed = true;
-								newGameArray[i][j][k] = 0;
-							}
-							break;
-						}
-					}
-				}
-			}
-		}
-		gameArray = $.extend(true, [], newGameArray);
-
-		iterations += 1;
-
-		if (!changed) endGame();
-
-		updateSidebar();
-		updateColours();
-
-		if (!(orbitToggle)) requestAnimationFrame(render);
-	}
-}
-
-/* checkCell takes an x, y and z value and checks the game board if the cell at that location is alive or dead and returns
- * 1 if it is alive and 0 if dead. Out of bound cells are handled by returning 0 */
-let checkCell = function(currX, currY, currZ) {
-	if (currX < 0 || currX >= xSize) {
-		return 0;
-	} else if (currY < 0 || currY >= ySize) {
-		return 0;
- 	} else if (currZ < 0 || currZ >= zSize) {
-		return 0;
-	} else if (gameArray[currX][currY][currZ] === 1) {
-		return 1;
-	} else {
-		return 0;
+		console.log("Browser does not support web workers, cannot run");
+		notify("Incompatible browser! please use a modern browser such as Chrome or Firefox");
+		window.alert("Your browser does not support Web Workers which are required by this website, please use modern browser such as Chrome or Firefox");
 	}
 }
 
@@ -657,7 +588,6 @@ let presetSelect = function() {
 function showHideJSON() {
 	let jsonTextarea = document.getElementById("jsonTextInput");
 	let jsonBtn = document.getElementById("jsonBtn");
-	let settingsPanel = document.getElementById("settingsPanel");
 	let jsonLoadBtn = document.getElementById("jsonLoadBtn");
 
 	if (jsonBtn.innerText === "show JSON") {
@@ -765,7 +695,6 @@ window.onload = function() {
 	worker = new Worker();
 	// When a message is received, the gameArray is updated with the new values, the
 	worker.onmessage = function(e) {
-		console.log("Message received from game.worker.js");
 		iterations += 1;
 		if (!e.data[1]) endGame();
 
