@@ -15,6 +15,7 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import './main.css';
 import './settingsPanel.js';
 import {notify} from './notification.js';
+import Worker from './game.worker.js';
 
 let $ = require('jquery/src/core');
 
@@ -31,6 +32,7 @@ let resizeTimer = false;
 let gameBoard;
 let gameArray;
 let startingArray;
+let worker;
 
 let liveCellColour = "#c24d2c";
 let deadCellColour = "#d9dad7";
@@ -54,77 +56,78 @@ let light = new AmbientLight(0xFFFFFF,1);
  * the board has been checked, if no cells have changed then the game is stopped. The side bar and cube colours are then
  * updated with their respective functions */
 let simulateStep = function() {
-	let newGameArray = $.extend(true, [], gameArray);
 
+	let ruleset = document.getElementById("presetRules").value;
 	let changed = false;
 
-	for (let i = 0; i < xSize; i++) {
-		for (let j = 0; j < ySize; j++) {
-			for (let k = 0; k < zSize; k++) {
-				let liveNum = 0;
-				for (let l = -1; l < 2; l++) {
-					for (let m = -1; m < 2; m++) {
-						for (let n = -1; n < 2; n++) {
-							if (!((l === 0) && (m === 0) && (n === 0))) {
-								liveNum += checkCell(i+l, j+m, k+n);
+	// If web workers are allowed in the browser then run code on game.worker.js
+	if (window.Worker) {
+
+		worker.postMessage([gameArray,xSize,ySize,zSize,ruleset]);
+
+	} else {
+		let newGameArray = $.extend(true, [], gameArray);
+
+		for (let i = 0; i < xSize; i++) {
+			for (let j = 0; j < ySize; j++) {
+				for (let k = 0; k < zSize; k++) {
+					let liveNum = 0;
+					for (let l = -1; l < 2; l++) {
+						for (let m = -1; m < 2; m++) {
+							for (let n = -1; n < 2; n++) {
+								if (!((l === 0) && (m === 0) && (n === 0))) {
+									liveNum += checkCell(i+l, j+m, k+n);
+								}
 							}
 						}
 					}
-				}
 
-				let ruleset = document.getElementById("presetRules").value;
-
-				switch (ruleset) {
-					case "Standard": {
-						// B3/S23 (Standard 2D GoL)
-						if ((liveNum === 3) && gameArray[i][j][k] === 0) {
-							changed = true;
-							newGameArray[i][j][k] = 1;
-						} else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
-							changed = true;
-							newGameArray[i][j][k] = 0;
+					switch (ruleset) {
+						case "Standard": {
+							// B3/S23 (Standard 2D GoL)
+							if ((liveNum === 3) && gameArray[i][j][k] === 0) {
+								changed = true;
+								newGameArray[i][j][k] = 1;
+							} else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
+								changed = true;
+								newGameArray[i][j][k] = 0;
+							}
+							break;
+						} case "B45/S5": {
+							// B45/S5
+							if ((liveNum === 4 || liveNum === 5) && gameArray[i][j][k] === 0) {
+								changed = true;
+								newGameArray[i][j][k] = 1;
+							} else if (!(liveNum === 5) && gameArray[i][j][k] === 1) {
+								newGameArray[i][j][k] = 0;
+							}
+							break;
+						} case "B36/S23": {
+							// B36/S23 (2D Highlife)
+							if ((liveNum === 3 || liveNum === 6) && gameArray[i][j][k] === 0) {
+								changed = true;
+								newGameArray[i][j][k] = 1;
+							} else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
+								changed = true;
+								newGameArray[i][j][k] = 0;
+							}
+							break;
 						}
-						break;
-					} case "B45/S5": {
-						// B45/S5
-						if ((liveNum === 4 || liveNum === 5) && gameArray[i][j][k] === 0) {
-							changed = true;
-							newGameArray[i][j][k] = 1;
-						} else if (!(liveNum === 5) && gameArray[i][j][k] === 1) {
-							newGameArray[i][j][k] = 0;
-						}
-						break;
-					} case "B36/S23": {
-						// B36/S23 (2D Highlife)
-						if ((liveNum === 3 || liveNum === 6) && gameArray[i][j][k] === 0) {
-							changed = true;
-							newGameArray[i][j][k] = 1;
-						} else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
-							changed = true;
-							newGameArray[i][j][k] = 0;
-						}
-						break;
 					}
 				}
 			}
 		}
-	}
-	gameArray = $.extend(true, [], newGameArray);
+		gameArray = $.extend(true, [], newGameArray);
 
-	iterations += 1;
+		iterations += 1;
 
-	if (!changed) {
-		clearInterval(interval);
-		document.getElementById("stopStart").innerText = "Start";
-		status = "stopped";
-		notify("Game has ended","success",10000);
+		if (!changed) endGame();
+
 		updateSidebar();
+		updateColours();
+
+		if (!(orbitToggle)) requestAnimationFrame(render);
 	}
-
-	updateSidebar();
-	updateColours();
-
-	if (!(orbitToggle)) requestAnimationFrame(render);
 }
 
 /* checkCell takes an x, y and z value and checks the game board if the cell at that location is alive or dead and returns
@@ -335,6 +338,15 @@ let gameReset = function() {
 	}
 
 	newGameFromJSON(startingArray,timeInput);
+}
+
+// When the game ends due to no changed cells, this code is executed to update the settings panel and stop timeout for the game.
+let endGame = function() {
+	clearInterval(interval);
+	document.getElementById("stopStart").innerText = "Start";
+	status = "stopped";
+	notify("Game has ended","success",10000);
+	updateSidebar();
 }
 
 /* The orbit controls can be disabled using this function. It sets controls.enabled and orbitToggle to false and adds
@@ -750,6 +762,19 @@ window.onload = function() {
 	// If a function is already assigned to window.onload then execute that first, then run code below
 	// This ensures no conflicts with settingsPanel onload function
 	if(typeof(existingOnload) == "function"){ existingOnload(); }
+	worker = new Worker();
+	// When a message is received, the gameArray is updated with the new values, the
+	worker.onmessage = function(e) {
+		console.log("Message received from game.worker.js");
+		iterations += 1;
+		if (!e.data[1]) endGame();
+
+		gameArray = e.data[0];
+		updateSidebar();
+		updateColours();
+
+		if (!(orbitToggle)) requestAnimationFrame(render);
+	}
 	camera.position.z = Math.max(xSize,ySize,zSize) * 1.5;
 
 	camera.position.x = xSize * 1.5;
