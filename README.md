@@ -9,7 +9,7 @@ Version 1.2 added Presets and Rules selection boxes (see heading Presets and Rul
 
 Version 1.3 added a toggle box to hide dead cells. This can dramatically improve performance if the majority of cells in the game are dead. Also added a basic wireframe box to represent the boundaries of the grid.
 
-Version 1.4 provides a back-end update that moved the live neighbour checking part of the code into a web worker so it runs on its own thread. This should help with CPU usage with low powered machines and big grid sizes. A modern browser that supports web workers is now required.
+Version 1.4 provided a back-end update that moved the live neighbour checking part of the code into a web worker so it runs on its own thread. This should help with CPU usage with low powered machines and big grid sizes. A modern browser that supports web workers is now required.
 
 ## How to deploy to the webserver
 After the new configuration changes and new files added in wip-core-server, the project can now be deployed to a web server. For this project, I am using an IONOS VPS running Ubuntu 20.04, I use Nginx configured to use port 3000 as this is the node application port for my project and it is fully configured with SSL and a domain (gol.samueltribe.com).
