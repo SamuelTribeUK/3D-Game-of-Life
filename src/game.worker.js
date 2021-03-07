@@ -6,10 +6,7 @@ let xSize,ySize,zSize;
 let gameArray;
 
 onmessage = function(e) {
-	let ruleset;
-	let liveNum;
 	let changed = false;
-	console.log('game.worker.js received message from main script');
 	// 3D array passed as e.data[0], process each cell within this array
 	gameArray = e.data[0];
 	let newGameArray = $.extend(true, [], gameArray);
@@ -17,12 +14,12 @@ onmessage = function(e) {
 	xSize = e.data[1];
 	ySize = e.data[2];
 	zSize = e.data[3];
-	ruleset = e.data[4];
+	let ruleset = e.data[4];
 
 	for (let i = 0; i < xSize; i++) {
 		for (let j = 0; j < ySize; j++) {
 			for (let k = 0; k < zSize; k++) {
-				liveNum = liveCount(i, j, k);
+				let liveNum = liveCount(i, j, k);
 
 				switch (ruleset) {
 					case "Standard": {
@@ -59,7 +56,6 @@ onmessage = function(e) {
 			}
 		}
 	}
-	console.log("Posting message back to main script");
 	postMessage([newGameArray,changed]);
 }
 
@@ -77,6 +73,8 @@ function liveCount(x,y,z) {
 	return liveNum;
 }
 
+/* checkCell takes an x, y and z value and checks the game board if the cell at that location is alive or dead and returns
+ * 1 if it is alive and 0 if dead. Out of bound cells are handled by returning 0 */
 function checkCell(currX, currY, currZ) {
 	if (currX < 0 || currX >= xSize) {
 		return 0;
