@@ -1,6 +1,8 @@
 # 3D-Game-of-Life version 1.5
 A Web-Based 3D Implementation of John Conway’s Game of Life Cellular Automaton (Final Year Project)
+
 This is the git repository for my final year university project. This project aims to create a web-based 3D version of the game of life cellular automaton (https://www.conwaylife.com/)
+
 Version 1.0 allows users to create custom grid sizes and game speeds, stop and start the game, and step through a single iteration. Notifications are displayed using toastify-js when settings are invalid or if the settings might cause lag.
 
 Version 1.1 added JSON functionality allowing the game grid to be exported to text in the settings panel and custom game states in JSON Array format can be loaded by pasting it in the JSON textarea on the settings panel.
