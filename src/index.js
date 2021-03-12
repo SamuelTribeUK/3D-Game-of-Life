@@ -40,7 +40,6 @@ let backgroundColour = "#1a2639";
 
 let iterations = 0;
 let status="stopped";
-
 let interval;
 
 const canvas = document.querySelector('canvas');
@@ -51,35 +50,33 @@ let renderer = new WebGLRenderer({antialias: true, canvas: canvas});
 let controls;
 let light = new AmbientLight(0xFFFFFF,1);
 
-/* simulateStep creates a deep copy of the game board to iterate over each cell and check for living neighbours to check
- * against the rules of the Game of Life. The new game board is required so there aren't conflicts with changes. After
- * the board has been checked, if no cells have changed then the game is stopped. The side bar and cube colours are then
- * updated with their respective functions */
-let simulateStep = function() {
-
+/**
+ * The simulateStep function uses the game.worker.js web worker to deep copy the current gameArray and calculate the
+ * gameArray values for the next iteration. After the board has been checked, if no cells have changed then the game is
+ * stopped. The settings panel and cube colours are then updated with their respective functions.
+ */
+function simulateStep() {
 	let ruleset = document.getElementById("presetRules").value;
-
 	// If web workers are allowed in the browser then run code on game.worker.js
 	if (window.Worker) {
-
 		// This is just in case the web worker was terminated, a new web worker will be created
 		if (!worker) {
 			worker = new Worker();
 		}
-
 		worker.postMessage([gameArray,xSize,ySize,zSize,ruleset]);
-
 	} else {
 		console.log("Browser does not support web workers, cannot run");
-		notify("Incompatible browser! please use a modern browser such as Chrome or Firefox");
+		notify("Incompatible browser! please use a modern browser such as Chrome or Firefox","error",10000);
 		window.alert("Your browser does not support Web Workers which are required by this website, please use modern browser such as Chrome or Firefox");
 	}
 }
 
-/* The camera z location is the largest of the x and y sizes with the x and y values being the centre of the grid. The
- * background colour is set to white. The canvas size is set to the window inner sizes with the width - 250 to account
- * for the side panel. The addLights function is called to add 2 PointLights */
-let setupScene = function() {
+/**
+ * The setupScene function creates a new scene matching the dimensions of the window. A wire-frame cube is drawn using
+ * LineSegments to represent the boundaries of the grid. An ambient light is added to the scene, this is so shadows
+ * don't cause confusion over cell states.
+ */
+function setupScene() {
 
 	renderer.setClearColor(backgroundColour);
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -96,8 +93,12 @@ let setupScene = function() {
 	scene.add(light);
 }
 
-// Initialise the 3D array game board with the specified x, y and z sizes and populate it with random cells
-let newRandomBoard = function() {
+/**
+ * The newRandomBoard function generates a new gameBoard (array containing the mesh boxes), gameArray (containing the
+ * states of the cells, and startingArray (a copy of the starting gameArray states so the game can be reset. Initial
+ * game states are generated at random.
+ */
+function newRandomBoard() {
 	document.getElementById("stopStart").innerText = "Start";
 	gameBoard = new Array(xSize);
 	gameArray = new Array(xSize);
@@ -123,7 +124,11 @@ let newRandomBoard = function() {
 	}
 }
 
-let newBoardFromJSON = function() {
+/**
+ * The newBoardFromJSON function generates a new gameBoard (array containing the mesh objects) generated from the JSON
+ * textarea.
+ */
+function newBoardFromJSON() {
 	document.getElementById("stopStart").innerText = "Start";
 	gameBoard = new Array(xSize);
 	for (let i = 0; i < xSize; i++) {
@@ -137,8 +142,23 @@ let newBoardFromJSON = function() {
 	}
 }
 
-
-let addMesh = function(state, i, j, k) {
+/**
+ * The addMesh function takes a state (1 for alive and 0 for dead) and coordinates (i, j, k representing x, y and z) and
+ * creates a geometry and material to make a mesh with the coordinates set to the i, j and k values. If the state is 0
+ * (dead) then the opacity of the material is set to 0.1 (10%) and the colour is set to white. If the state is 1 (alive)
+ * then the opacity of the material is set to 1 (100%) and the colour is set to #c24d2c (the orange used for the rest of
+ * the website). The gameArray and startingArray are assigned the state values in the location [i][j][k]. The gameBoard
+ * is assigned the mesh in the location [i][j][k] and this value is then added to the scene.
+ *
+ * @param {number} state - The state of the cell (either 1 for alive or 0 for dead)
+ * @param {number} i - The x coordinate of the cell to be added (also corresponds to the i location in the
+ * gameArray[i][j][k] commonly used throughout this project.
+ * @param {number} j - The y coordinate of the cell to be added (also corresponds to the j location in the
+ * gameArray[i][j][k] commonly used throughout this project.
+ * @param {number} k - The z coordinate of the cell to be added (also corresponds to the k location in the
+ * gameArray[i][j][k] commonly used throughout this project.
+ */
+function addMesh(state,i,j,k) {
 	let opacity = 1;
 	let colour = liveCellColour;
 	if (state === 0) {
@@ -155,9 +175,11 @@ let addMesh = function(state, i, j, k) {
 	scene.add(gameBoard[i][j][k]);
 }
 
-/* The functions that handle all buttons and inputs on the side panel are attached in this function, as well as the
- * resize event function and the arrow key camera controls. The input fields are populated with the start values */
-let attachClickEvents = function() {
+/**
+ * The attachClickEvents function adds all of the appropriate functions as eventListeners for the settings Panel. The
+ * input fields are populated with the initial values.
+ * */
+function attachClickEvents()  {
 	let element = document.getElementById("stopStart");
 	element.addEventListener("click", stopStart);
 
@@ -194,19 +216,28 @@ let attachClickEvents = function() {
 	document.getElementById("jsonBtn").onclick = showHideJSON;
 	document.getElementById("jsonLoadBtn").onclick = loadJSON;
 
-	// Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
-	window.addEventListener("resize", () => {
-		if (resizeTimer) {
-			clearTimeout(resizeTimer);
-		}
-		resizeTimer = setTimeout(resizeWindow, 100);
-	});
-
-	// document.addEventListener("keydown", arrowKeyCameraControls);
+	//
+	window.addEventListener("resize", resizeListener);
 }
 
-// Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
-let resizeWindow = function() {
+/**
+ * The resizeListener function is used as an eventListener for when the window resizes. A setTimeout is used to call the
+ * resizeWindow function after 100ms, and if the window is resized within that time, the timer is reset. This prevents
+ * the renderer and camera from updating too many times when resizing. This was implemented thanks to a StackOverflow
+ * answer by theftprevention: https://bit.ly/2MNbfy8
+ */
+function resizeListener() {
+	if (resizeTimer) {
+		clearTimeout(resizeTimer);
+	}
+	resizeTimer = setTimeout(resizeWindow, 100);
+}
+
+/**
+ * The resizeWindow function updates the renderer size and camera aspect to match the dimensions of the window (after
+ * resizing). RequestAnimationFrame is called to ensure the scene is updated to the user.
+ */
+function resizeWindow() {
 	resizeTimer = false;
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	camera.aspect = window.innerWidth / window.innerHeight;
@@ -214,9 +245,12 @@ let resizeWindow = function() {
 	requestAnimationFrame(render);
 }
 
-/* When the user clicks the stop/start button, this function handles the stopping and starting of the game using
- * setInterval nad clearInterval, updating the sidebar and button text in the process */
-let stopStart = function() {
+/**
+ * The stopStart function is called when the user clicks the stop/start button, this function handles the stopping and
+ * starting of the game using setInterval and clearInterval, updating the sidebar and button text in the process. The
+ * timeInput value is also updated. If orbit controls are disabled requestAnimationFrame is then also called.
+ */
+function stopStart() {
 	if (status === "stopped") {
 		let timeInput = document.getElementById("timeoutInput").value;
 
@@ -242,8 +276,11 @@ let stopStart = function() {
 	if (!(orbitToggle)) requestAnimationFrame(render);
 }
 
-// When the user clicks the step button, this function stops the game if it's running and simulates one step
-let step = function() {
+/**
+ * The step function is called when the step button is clicked and it runs one iteration of simulateStep. If the game is
+ * already running then clearInterval is used to stop the game first before calling simulateStep.
+ */
+function step() {
 	if (status === "stopped") {
 		simulateStep();
 	} else {
@@ -251,7 +288,6 @@ let step = function() {
 		document.getElementById("stopStart").innerText = "Start";
 		status = "stopped";
 		simulateStep();
-		updateSidebar();
 	}
 }
 
