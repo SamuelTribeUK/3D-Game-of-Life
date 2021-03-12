@@ -51,6 +51,14 @@ onmessage = function(e) {
 							newGameArray[i][j][k] = 0;
 						}
 						break;
+					} case "B6/S567": {
+						if (liveNum === 6 && gameArray[i][j][k] === 0) {
+							changed = true;
+							newGameArray[i][j][k] = 1;
+						} else if (!((liveNum > 4) && (liveNum < 8)) && gameArray[i][j][k] === 1) {
+							changed = true;
+							newGameArray[i][j][k] = 0;
+						}
 					}
 				}
 			}

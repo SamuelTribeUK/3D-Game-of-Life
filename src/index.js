@@ -581,6 +581,45 @@ let presetSelect = function() {
 
 			newGameFromJSON(accordionArray,timeInput);
 			break;
+		} case "Carter Bays Glider B6/S567": {
+			for (let i = 0; i < dimensionInputs.length; i++) {
+				dimensionInputs[i].disabled = true;
+			}
+
+			rules.value = "B6/S567";
+
+			updateBtn.disabled = true;
+
+			let gliderArray = new Array(30);
+
+			for (let i = 0; i < 30; i++) {
+				gliderArray[i] = new Array(30);
+				for (let j = 0; j < 30; j++) {
+					gliderArray[i][j] = new Array(2);
+					if ((i === 0 && j === 27) || (i === 1) && (j === 27 || j===29) || (i === 2) && (j === 27 || j === 28)) {
+						gliderArray[i][j][0] = 1;
+						gliderArray[i][j][1] = 1;
+					} else {
+						for (let k = 0; k < 2; k++) {
+							gliderArray[i][j][k] = 0;
+						}
+					}
+				}
+			}
+
+			let timeInput = document.getElementById("timeoutInput").value;
+
+			if (timeInput < 0.1) {
+				notify("speed must be 0.1 or more", "error", 5000);
+				break;
+			}
+
+			if (timeInput > 10) {
+				notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
+			}
+
+			newGameFromJSON(gliderArray,timeInput);
+			break;
 		}
 	}
 }
