@@ -64,7 +64,6 @@ let simulateStep = function() {
 
 		// This is just in case the web worker was terminated, a new web worker will be created
 		if (!worker) {
-			console.log("!worker in simulateStep");
 			worker = new Worker();
 		}
 
