@@ -3,7 +3,7 @@ import Toastify from "toastify-js";
 export function notify(text, type, duration) {
 	let backgroundColor;
 	if (type === "success") {
-		backgroundColor = "linear-gradient(to left, #8A261C, #B2482E)";
+		backgroundColor = "linear-gradient(to left, #11998E, #27A656)";
 	} else if (type === "error") {
 		backgroundColor = "linear-gradient(to left, #8A261C, #B2482E)";
 	}
