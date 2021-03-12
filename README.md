@@ -16,7 +16,7 @@ Version 1.5 added a glider preset based on a glider shown by Carter Bays in the 
 ## How to deploy to the webserver
 After the new configuration changes and new files added in wip-core-server, the project can now be deployed to a web server. For this project, I am using an IONOS VPS running Ubuntu 20.04, I use Nginx configured to use port 3000 as this is the node application port for my project and it is fully configured with SSL and a domain (gol.samueltribe.com).
 
-When I want to deploy to the server (usually after merging a feature branch with dev or dev with master) I clone the git repo on the webserver, change to the desired branch and use npm install (ensure you have installed node js and npm), then run 'npm run build-production'. This will generate the production build of the project within the dist folder. I have a server.js file using express to use the dist folder for the application and to listen on port 3000 (for Nginx). I then use 'forever' to start server.js forever in the background (helpful when using SSL like me), then try to connect to the website.
+When I want to deploy to the server (usually after merging a feature branch with dev or dev with master) I clone the git repo on the webserver, change to the desired branch and use npm install (ensure you have installed node js and npm), then run 'npm run build-production'. This will generate the production build of the project within the dist folder. I have a server.js file using express to use the dist folder for the application and to listen on port 3000 (for Nginx). I then use 'forever' to start server.js forever in the background (helpful when using SSH like me), then try to connect to the website.
 
 Hopefully, if all is completed correctly, you should see the 3D Game of Life webpage!
 
@@ -31,4 +31,3 @@ As of v 1.5, there are 4 pre-set options:
 4. Carter Bays Glider B6/S567 (This was implemented based on "Candidates for the Game of Life in Three Dimensions" by Carter Bays, published in the first edition of the Complex Systems Journal 1987 (373-400))
 
 I want it to be clear that The Blinker and Accordion pre-set configurations were not discovered by me, I found them from Raphael Beaulieu's and Elliot Coy's 3D Game of life linked above. The Carter Bays Glider was implemented based on the journal publication linked above.
-I used these for testing (this was the first time that I could consistently test the same game grid in code) and I can proudly say that my implementation works as expected.
