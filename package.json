@@ -1,6 +1,10 @@
 {
   "name": "3d-game-of-life",
   "version": "1.6.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SamuelTribeUK/3D-Game-of-Life.git"
+  },
   "homepage": "https://github.com/SamuelTribeUK/3D-Game-of-Life",
   "dependencies": {
     "express": "~4.17.1",
