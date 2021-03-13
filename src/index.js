@@ -15,6 +15,7 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import './main.css';
 import './settingsPanel.js';
 import {notify} from './notification.js';
+import "toastify-js/src/toastify.css";
 import Worker from './game.worker.js';
 
 let $ = require('jquery/src/core');
@@ -40,7 +41,6 @@ let backgroundColour = "#1a2639";
 
 let iterations = 0;
 let status="stopped";
-
 let interval;
 
 const canvas = document.querySelector('canvas');
@@ -51,35 +51,33 @@ let renderer = new WebGLRenderer({antialias: true, canvas: canvas});
 let controls;
 let light = new AmbientLight(0xFFFFFF,1);
 
-/* simulateStep creates a deep copy of the game board to iterate over each cell and check for living neighbours to check
- * against the rules of the Game of Life. The new game board is required so there aren't conflicts with changes. After
- * the board has been checked, if no cells have changed then the game is stopped. The side bar and cube colours are then
- * updated with their respective functions */
-let simulateStep = function() {
-
+/**
+ * The simulateStep function uses the game.worker.js web worker to deep copy the current gameArray and calculate the
+ * gameArray values for the next iteration. After the board has been checked, if no cells have changed then the game is
+ * stopped. The settings panel and cube colours are then updated with their respective functions.
+ */
+function simulateStep() {
 	let ruleset = document.getElementById("presetRules").value;
-
 	// If web workers are allowed in the browser then run code on game.worker.js
 	if (window.Worker) {
-
 		// This is just in case the web worker was terminated, a new web worker will be created
 		if (!worker) {
 			worker = new Worker();
 		}
-
 		worker.postMessage([gameArray,xSize,ySize,zSize,ruleset]);
-
 	} else {
 		console.log("Browser does not support web workers, cannot run");
-		notify("Incompatible browser! please use a modern browser such as Chrome or Firefox");
+		notify("Incompatible browser! please use a modern browser such as Chrome or Firefox","error",10000);
 		window.alert("Your browser does not support Web Workers which are required by this website, please use modern browser such as Chrome or Firefox");
 	}
 }
 
-/* The camera z location is the largest of the x and y sizes with the x and y values being the centre of the grid. The
- * background colour is set to white. The canvas size is set to the window inner sizes with the width - 250 to account
- * for the side panel. The addLights function is called to add 2 PointLights */
-let setupScene = function() {
+/**
+ * The setupScene function creates a new scene matching the dimensions of the window. A wire-frame cube is drawn using
+ * LineSegments to represent the boundaries of the grid. An ambient light is added to the scene, this is so shadows
+ * don't cause confusion over cell states.
+ */
+function setupScene() {
 
 	renderer.setClearColor(backgroundColour);
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -96,9 +94,14 @@ let setupScene = function() {
 	scene.add(light);
 }
 
-// Initialise the 3D array game board with the specified x, y and z sizes and populate it with random cells
-let newRandomBoard = function() {
+/**
+ * The newRandomBoard function generates a new gameBoard (array containing the mesh boxes), gameArray (containing the
+ * states of the cells, and startingArray (a copy of the starting gameArray states so the game can be reset. Initial
+ * game states are generated at random.
+ */
+function newRandomBoard() {
 	document.getElementById("stopStart").innerText = "Start";
+	updateSettingsDimensions();
 	gameBoard = new Array(xSize);
 	gameArray = new Array(xSize);
 	startingArray = new Array(xSize);
@@ -123,8 +126,13 @@ let newRandomBoard = function() {
 	}
 }
 
-let newBoardFromJSON = function() {
+/**
+ * The newBoardFromJSON function generates a new gameBoard (array containing the mesh objects) generated from the JSON
+ * textarea.
+ */
+function newBoardFromJSON() {
 	document.getElementById("stopStart").innerText = "Start";
+	updateSettingsDimensions();
 	gameBoard = new Array(xSize);
 	for (let i = 0; i < xSize; i++) {
 		gameBoard[i] = new Array(ySize);
@@ -137,8 +145,23 @@ let newBoardFromJSON = function() {
 	}
 }
 
-
-let addMesh = function(state, i, j, k) {
+/**
+ * The addMesh function takes a state (1 for alive and 0 for dead) and coordinates (i, j, k representing x, y and z) and
+ * creates a geometry and material to make a mesh with the coordinates set to the i, j and k values. If the state is 0
+ * (dead) then the opacity of the material is set to 0.1 (10%) and the colour is set to white. If the state is 1 (alive)
+ * then the opacity of the material is set to 1 (100%) and the colour is set to #c24d2c (the orange used for the rest of
+ * the website). The gameArray and startingArray are assigned the state values in the location [i][j][k]. The gameBoard
+ * is assigned the mesh in the location [i][j][k] and this value is then added to the scene.
+ *
+ * @param {number} state - The state of the cell (either 1 for alive or 0 for dead)
+ * @param {number} i - The x coordinate of the cell to be added (also corresponds to the i location in the
+ * gameArray[i][j][k] commonly used throughout this project.
+ * @param {number} j - The y coordinate of the cell to be added (also corresponds to the j location in the
+ * gameArray[i][j][k] commonly used throughout this project.
+ * @param {number} k - The z coordinate of the cell to be added (also corresponds to the k location in the
+ * gameArray[i][j][k] commonly used throughout this project.
+ */
+function addMesh(state,i,j,k) {
 	let opacity = 1;
 	let colour = liveCellColour;
 	if (state === 0) {
@@ -155,9 +178,11 @@ let addMesh = function(state, i, j, k) {
 	scene.add(gameBoard[i][j][k]);
 }
 
-/* The functions that handle all buttons and inputs on the side panel are attached in this function, as well as the
- * resize event function and the arrow key camera controls. The input fields are populated with the start values */
-let attachClickEvents = function() {
+/**
+ * The attachClickEvents function adds all of the appropriate functions as eventListeners for the settings Panel. The
+ * input fields are populated with the initial values.
+ * */
+function attachClickEvents()  {
 	let element = document.getElementById("stopStart");
 	element.addEventListener("click", stopStart);
 
@@ -194,19 +219,28 @@ let attachClickEvents = function() {
 	document.getElementById("jsonBtn").onclick = showHideJSON;
 	document.getElementById("jsonLoadBtn").onclick = loadJSON;
 
-	// Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
-	window.addEventListener("resize", () => {
-		if (resizeTimer) {
-			clearTimeout(resizeTimer);
-		}
-		resizeTimer = setTimeout(resizeWindow, 100);
-	});
-
-	// document.addEventListener("keydown", arrowKeyCameraControls);
+	//
+	window.addEventListener("resize", resizeListener);
 }
 
-// Window resize lag fix function below adapted from StackOverflow: https://bit.ly/2MNbfy8 answer by theftprevention
-let resizeWindow = function() {
+/**
+ * The resizeListener function is used as an eventListener for when the window resizes. A setTimeout is used to call the
+ * resizeWindow function after 100ms, and if the window is resized within that time, the timer is reset. This prevents
+ * the renderer and camera from updating too many times when resizing. This was implemented thanks to a StackOverflow
+ * answer by theftprevention: https://bit.ly/2MNbfy8
+ */
+function resizeListener() {
+	if (resizeTimer) {
+		clearTimeout(resizeTimer);
+	}
+	resizeTimer = setTimeout(resizeWindow, 100);
+}
+
+/**
+ * The resizeWindow function updates the renderer size and camera aspect to match the dimensions of the window (after
+ * resizing). RequestAnimationFrame is called to ensure the scene is updated to the user.
+ */
+function resizeWindow() {
 	resizeTimer = false;
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	camera.aspect = window.innerWidth / window.innerHeight;
@@ -214,9 +248,12 @@ let resizeWindow = function() {
 	requestAnimationFrame(render);
 }
 
-/* When the user clicks the stop/start button, this function handles the stopping and starting of the game using
- * setInterval nad clearInterval, updating the sidebar and button text in the process */
-let stopStart = function() {
+/**
+ * The stopStart function is called when the user clicks the stop/start button, this function handles the stopping and
+ * starting of the game using setInterval and clearInterval, updating the sidebar and button text in the process. The
+ * timeInput value is also updated. If orbit controls are disabled requestAnimationFrame is then also called.
+ */
+function stopStart() {
 	if (status === "stopped") {
 		let timeInput = document.getElementById("timeoutInput").value;
 
@@ -232,18 +269,21 @@ let stopStart = function() {
 		interval = setInterval(simulateStep, timeout);
 		document.getElementById("stopStart").innerText = "Stop";
 		status = "playing";
-		updateSidebar();
+		updateSettingsPanel();
 	} else {
 		clearInterval(interval);
 		document.getElementById("stopStart").innerText = "Start";
 		status = "stopped";
-		updateSidebar();
+		updateSettingsPanel();
 	}
 	if (!(orbitToggle)) requestAnimationFrame(render);
 }
 
-// When the user clicks the step button, this function stops the game if it's running and simulates one step
-let step = function() {
+/**
+ * The step function is called when the step button is clicked and it runs one iteration of simulateStep. If the game is
+ * already running then clearInterval is used to stop the game first before calling simulateStep.
+ */
+function step() {
 	if (status === "stopped") {
 		simulateStep();
 	} else {
@@ -251,72 +291,93 @@ let step = function() {
 		document.getElementById("stopStart").innerText = "Start";
 		status = "stopped";
 		simulateStep();
-		updateSidebar();
 	}
 }
 
-let gameReset = function() {
+/**
+ * The gameReset function resets the grid to the startingArray states using the newGameFromJSON function. The
+ * timeoutInput is also updated with notifications being displayed if the input is less than 0.1, then false is returned
+ * indicating that the function did not successfully reset the game.
+ * @returns {boolean} - false is returned if the timeInput value is less than 0.1
+ */
+function gameReset() {
 	let timeInput = document.getElementById("timeoutInput").value;
 
 	if (timeInput < 0.1) {
 		notify("speed must be 0.1 or more", "error", 5000);
 		return false;
 	}
-
 	if (timeInput > 10) {
 		notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
 	}
-
 	newGameFromJSON(startingArray,timeInput);
 }
 
-// When the game ends due to no changed cells, this code is executed to update the settings panel and stop timeout for the game.
-let endGame = function() {
+/**
+ * The endGame function handles the end of the game when no changes have been made to any cells after an iteration.
+ * clearInterval is used to stop the game and the settings panel information is updated. A notification is also shown
+ * using the notify function to show the user that the game has ended.
+ */
+function endGame() {
 	clearInterval(interval);
 	document.getElementById("stopStart").innerText = "Start";
 	status = "stopped";
 	notify("Game has ended","success",10000);
-	updateSidebar();
+	updateSettingsPanel();
 }
 
-/* The orbit controls can be disabled using this function. It sets controls.enabled and orbitToggle to false and adds
- * arrow key event listeners for the standard camera controls */
-let disableOrbit = function() {
+/**
+ * The disableOrbit function disables the orbit controls and adds the arrowKeyCameraControls function as an event
+ * listener on keydown so the user has some form of camera control.
+ */
+function disableOrbit() {
 	controls.enabled = false;
 	orbitToggle = false;
 	document.addEventListener("keydown", arrowKeyCameraControls);
 }
 
-let enableOrbit = function() {
-	// Enable orbit controls
+/**
+ * The enableOrbit function enables the orbit controls and removes the arrowKeyCameraControls event listener from
+ * keydown so there are no conflicts with the orbit controls. The target of the controls is also reset to the centre of
+ * the game grid.
+ */
+function enableOrbit() {
 	document.removeEventListener("keydown", arrowKeyCameraControls);
 	controls.enabled = true;
 	controls.target = (new Vector3((xSize - 1) / 2, (ySize - 1) / 2, (zSize - 1) / 2));
 	orbitToggle = true;
-	// notify("Orbit controls enabled","success",5000);
 	render();
 }
 
-let showHideDeadCells = function() {
+/**
+ * The showHideDeadCells function assigns the hideDead variable with the value of the hideDeadBox checkbox on the
+ * settings panel. The updateColours function is then called so the dead cells are hidden immediately.
+ */
+function showHideDeadCells() {
 	hideDead = document.getElementById("hideDeadBox").value;
 	updateColours();
 }
 
-/* toggleOrbitControls handles the orbit camera controls being enabled/disabled and configures the target of the camera.
- * The arrow key event listeners for the standard camera controls are disabled when enabling orbit controls to avoid
- * conflicts with the existing event listeners included with orbit controls */
-let toggleOrbitControls = function() {
+/**
+ * The toggleOrbitControls function checks if the orbit controls checkbox on the settings panel is checked, if so then
+ * the enableOrbit function is called, if not then the disableOrbit function is called.
+ */
+function toggleOrbitControls() {
 	if (orbitCheckbox.checked) {
 		enableOrbit();
 	} else {
-		// Disable orbit controls
 		disableOrbit();
 	}
 }
 
-/* arrowKeyCameraControls manages the camera location movement, requesting an animation frame after camera movement to
- * render the changes on the canvas */
-let arrowKeyCameraControls = function(event) {
+/**
+ * The arrowKeyCameraControls function handles movement of the camera according to arrow key inputs. This function is
+ * attached as an event listener to keydown when orbit controls are disabled. The world direction from the camera is
+ * retrieved so the arrow keys work even if the camera was rotated around the object. The camera position is moved by 1
+ * in the dimension specified in relation to the camera direction. Only up, down, left and right are currently supported
+ * so the z position of the camera cannot be changed with arrow key controls.
+ */
+function arrowKeyCameraControls(event) {
 	let direction = new Vector3;
 	camera.getWorldDirection(direction);
 
@@ -352,10 +413,13 @@ let arrowKeyCameraControls = function(event) {
 	requestAnimationFrame(render);
 }
 
-/* updateColours iterates over the game board and updates the colours of the cubes on the canvas to represent the living
- * and dead cells with green and white respectively */
-let updateColours = function() {
-	let hideDead = document.getElementById("hideDeadBox").checked;
+/**
+ * The updateColours function updates all of the cell colours for the game. The state is retrieved from the gameArray
+ * and the visibility of the mesh is changed if the hideDead option is true, with the dead cells visibility being
+ * assigned false. If hideDead is false then the opacity is set to 0.1 (10%) for dead cells and 1 (100%) for live cells.
+ * The colour of the cells is updated according to their states, they are white if dead and orange if alive.
+ */
+function updateColours() {
 	let state;
 	let opacity = 1;
 	let colour = liveCellColour;
@@ -382,27 +446,47 @@ let updateColours = function() {
 	}
 }
 
-// The game status and number of iterations on the side bar are updated using the updateSidebar function
-let updateSidebar = function() {
+/**
+ * The updateSettingsPanel function updates the information on the settings panel to the current values of the game. The
+ * status innerText is updated (either "stopped" or "playing"), as well as the number of iterations.
+ */
+function updateSettingsPanel() {
 	document.getElementById("status").innerText = "Status: " + status;
 	document.getElementById("iterations").innerText = "Iterations: " + iterations;
+}
+
+/**
+ * The updateSettingsDimensions function updates the dimensions values on the settings panel to the current values used
+ * in code. This is used after any new game is created so the user knows how big the game grid is.
+ */
+function updateSettingsDimensions() {
 	document.getElementById("xSizeInput").value = xSize.toString();
 	document.getElementById("ySizeInput").value = ySize.toString();
 	document.getElementById("zSizeInput").value = zSize.toString();
 }
 
-/* render renders the objects in the scene in accordance to the camera location. If orbit controls are enabled then an
- * animation frame is requested too */
-let render = function() {
+/**
+ * The render function handles the rendering of the three.js scene, if orbit controls are enabled then
+ * requestAnimationFrame is also called so the canvas updates.
+ */
+function render() {
 	if (orbitToggle) {
 		requestAnimationFrame(render);
 	}
 	renderer.render(scene, camera);
 }
 
-/* newGameBoard is called when the user clicks the update button on the side bar. First the inputs are validated and if
- * all values are valid then the scene is disposed using doDispose and the new values are used to create a new scene. */
-let newGameBoard = function(event) {
+/**
+ * The newGameBoard function is called when the user clicks the update button on the side bar. First the inputs are
+ * validated and if all values are valid then the game is stopped (if it was running) and the scene is disposed using
+ * the doDispose function and the new values are used to create a new scene. The setupScene and newRandomBoard functions
+ * are used to create this new scene and a new random game board. If the JSON textarea is opened then the new random
+ * game array is shown in there. The camera.lookAt function is used to reset the camera to target the centre of the new
+ * game grid. Finally, if orbit controls are enabled then they are disabled for 10ms and enabled again, this is because
+ * with them enabled there is significant lag after the new game board has been generated, re-enabling them seems to fix
+ * this.
+ */
+function newGameBoard(event) {
 	event.preventDefault(); // This stops the form from submitting and refreshing the page
 	let inputX = document.getElementById("xSizeInput").value;
 	let inputY = document.getElementById("ySizeInput").value;
@@ -448,8 +532,8 @@ let newGameBoard = function(event) {
 		stopStart();
 	}
 
-	gameBoard = null;
-	gameArray = null;
+	gameBoard = undefined;
+	gameArray = undefined;
 	iterations = 0;
 
 	scene = new Scene();
@@ -458,7 +542,7 @@ let newGameBoard = function(event) {
 
 	newRandomBoard();
 
-	updateSidebar();
+	updateSettingsPanel();
 	let jsonTextarea = document.getElementById("jsonTextInput");
 	if (jsonTextarea.style.visibility === "visible") {
 		jsonTextarea.value = JSON.stringify(gameArray);
@@ -475,9 +559,13 @@ let newGameBoard = function(event) {
 	}
 }
 
-/* doDispose is a thorough deep dispose of the scene and it's children. This is called when a new game board is made to
- * avoid memory leaks. The code was taken from: https://github.com/mrdoob/three.js/issues/5175 */
-let doDispose = function(obj) {
+/**
+ * The doDispose function is a thorough deep dispose of the scene and it's children. This is called when a new game
+ * board is made to avoid memory leaks.
+ *
+ * The code is by stevensanborn on github: https://github.com/mrdoob/three.js/issues/5175
+ */
+function doDispose(obj) {
 	if (obj !== null)
 	{
 		for (let i = 0; i < obj.children.length; i++)
@@ -503,7 +591,12 @@ let doDispose = function(obj) {
 	obj = undefined;
 }
 
-let presetSelect = function() {
+/**
+ * The presetSelect function is called when the preset drop-down selector value is changed. A switch case statement is
+ * used to handle the preset options, with the preset gameGrids being used for the new game array. This code could be
+ * improved by not storing entire gameArrays for each preset like for the glider I have that produced programmatically.
+ */
+function presetSelect() {
 	let preset = document.getElementById("presets").value;
 	let updateBtn = document.getElementById("submit");
 	let rules = document.getElementById("presetRules");
@@ -623,6 +716,11 @@ let presetSelect = function() {
 	}
 }
 
+/**
+ * The showHideJSON function handles the visibility of the JSON textarea input by changing the height and visibility
+ * style values. When the JSON input is shown, the current JSON.stringify version of the gameArray is shown in the
+ * textarea.
+ */
 function showHideJSON() {
 	let jsonTextarea = document.getElementById("jsonTextInput");
 	let jsonBtn = document.getElementById("jsonBtn");
@@ -644,7 +742,15 @@ function showHideJSON() {
 	}
 }
 
-let loadJSON = function() {
+/**
+ * The loadJSON function is used to read the input from the jsonTextInput textarea and parse it to a usable gameArray.
+ * JSON.parse is used and then the lengths of the array values are checked to be consistent, if they are not then a
+ * notification is displayed using the notify function and false is returned. If the format is incorrect then JSON.parse
+ * often throws an error so I have a try catch block around this code, with a notify function call in the catch to tell
+ * the user their JSON input is incorrect.
+ * @returns {boolean} - false is returned if the input JSON is not valid
+ */
+function loadJSON() {
 	let input = document.getElementById("jsonTextInput").value;
 	try {
 		let parsedInput = JSON.parse(input);
@@ -657,11 +763,17 @@ let loadJSON = function() {
 				if (parsedInput[i][j].length !== parsedInput[0][0].length) {
 					incorrectFormat = true;
 				}
+				for (let k = 0; k < parsedInput[0][0].length; k++) {
+					if (!(parsedInput[i][j][k] === 1 || parsedInput[i][j][k] === 0)) {
+						incorrectFormat = true;
+					}
+				}
 			}
 		}
 
 		if (incorrectFormat) {
 			notify("ERROR: incorrect JSON Array format","error",3000);
+			return false;
 		}
 
 		let timeInput = document.getElementById("timeoutInput").value;
@@ -678,13 +790,19 @@ let loadJSON = function() {
 		newGameFromJSON(parsedInput,timeInput);
 
 	} catch (e) {
-		notify("ERROR: incorrect JSON", "error", 3000);
+		notify("ERROR: incorrect JSON Array format", "error", 3000);
 	}
 }
 
-let newGameFromJSON = function(jsonArray,timeInput) {
+/**
+ * The newGameFromJSON function takes a json parsed array and the timeInput and creates a new game from the jsonArray.
+ * This code is similar to the newRandomGame function, however the xSize, ySize and zSize are determined from the length
+ * of each dimension in the jsonArray.
+ * @param {Array<number>} jsonArray - The new gameArray taken from the JSON input textarea
+ * @param {number} timeInput - The updated timeInput value from the settings panel
+ */
+function newGameFromJSON(jsonArray,timeInput) {
 	doDispose(scene);
-
 
 	if (status === "playing") {
 		stopStart();
@@ -707,7 +825,7 @@ let newGameFromJSON = function(jsonArray,timeInput) {
 
 	newBoardFromJSON();
 
-	updateSidebar();
+	updateSettingsPanel();
 
 	camera.lookAt(new Vector3((xSize - 1) / 2, (ySize - 1) / 2, (zSize - 1) / 2));
 
@@ -721,27 +839,40 @@ let newGameFromJSON = function(jsonArray,timeInput) {
 	updateColours();
 }
 
-setupScene();
-newRandomBoard();
+/**
+ * The onMessage function is called when a message is received from the game.worker.js web worker. The number of
+ * iterations is incremented, if the changed value returned in message.data[1] is false then the endGame function is
+ * called. If changed is true then gameArray is assigned the value of message.data[0] and the updateSettingsPanel and
+ * updateColours functions are called. If orbit controls are disabled then requestAnimationFrame is called to ensure the
+ * canvas updates.
+ * @param message - the message received from the game.worker.js web worker. message.data[0] contains the new gameArray
+ * and message.data[1] is the changed boolean, being false if no changes occurred (meaning the end of the game).
+ */
+function onMessage(message) {
+	iterations += 1;
+	if (!message.data[1]) endGame();
 
+	gameArray = message.data[0];
+	updateSettingsPanel();
+	updateColours();
 
-let existingOnload = window.onload;
-window.onload = function() {
+	if (!(orbitToggle)) requestAnimationFrame(render);
+}
+
+/**
+ * The onload function is all of the code that is executed on window load. This includes camera positioning, web worker
+ * creation and calling attachClickEvents. These can be optimised in the future as the camera code may not require the
+ * window to be loaded. If there is an existing onload function then that code is executed first and the rest of this
+ * function is executed afterwards.
+ */
+function onload() {
 	// If a function is already assigned to window.onload then execute that first, then run code below
 	// This ensures no conflicts with settingsPanel onload function
 	if(typeof(existingOnload) == "function"){ existingOnload(); }
+	updateSettingsDimensions();
 	worker = new Worker();
-	// When a message is received, the gameArray is updated with the new values, the
-	worker.onmessage = function(e) {
-		iterations += 1;
-		if (!e.data[1]) endGame();
 
-		gameArray = e.data[0];
-		updateSidebar();
-		updateColours();
-
-		if (!(orbitToggle)) requestAnimationFrame(render);
-	}
+	worker.onmessage = onMessage;
 	camera.position.z = Math.max(xSize,ySize,zSize) * 1.5;
 
 	camera.position.x = xSize * 1.5;
@@ -758,7 +889,13 @@ window.onload = function() {
 
 	document.getElementById("stopStart").innerText = "Start";
 	status = "stopped";
-	updateSidebar();
-};
+	updateSettingsPanel();
+}
+
+let existingOnload = window.onload;
+window.onload = onload;
+
+setupScene();
+newRandomBoard();
 
 render();

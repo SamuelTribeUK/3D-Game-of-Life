@@ -3,12 +3,11 @@
 <head>
 	<meta charset="UTF-8">
 	<title><%= htmlWebpackPlugin.options.title %></title>
-	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>
 <div id="settingsPanel" class="settingsPanel">
 	<h1>Settings</h1>
-	<a id="closebtn" href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+	<a id="closebtn" href="javascript:void(0)" class="closebtn" onclick="closeSettings()">&times;</a>
 	<button class="stopStart" id="stopStart">Start</button>
 	<button class="step" id="step">Step</button>
 	<button class="reset" id="reset">Reset</button>
