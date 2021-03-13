@@ -15,6 +15,7 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import './main.css';
 import './settingsPanel.js';
 import {notify} from './notification.js';
+import "toastify-js/src/toastify.css";
 import Worker from './game.worker.js';
 
 let $ = require('jquery/src/core');
