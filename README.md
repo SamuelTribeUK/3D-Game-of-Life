@@ -29,7 +29,7 @@ The preferred font used for the site is Cascadia Code (https://github.com/micros
 
 ## Presets and Rules
 As of v 1.5, there are 4 pre-set options:
-1. Custom (This is the standard random starting config with dimensions and speed user specified)
+1. Custom (This is the standard random starting config with dimensions and speed user-specified)
 2. Blinker B45/S5 (This was implemented based on http://rbeaulieu.github.io/3DGameOfLife/)
 3. Accordion Replicator B45/S5 (This was implemented based on http://rbeaulieu.github.io/3DGameOfLife/)
 4. Carter Bays Glider B6/S567 (This was implemented based on "Candidates for the Game of Life in Three Dimensions" by Carter Bays, published in the first edition of the Complex Systems Journal 1987 (373-400))
