@@ -29,7 +29,7 @@ module.exports = {
 	plugins: [
 		new HtmlWebpackPlugin({
 			title: '3D Game of Life - Samuel Tribe',
-			version: '1.6 jsdoc',
+			version: '1.6',
 			template: path.resolve(__dirname, './src/template.html'),
 			filename: 'index.html',
 			favicon: 'src/assets/images/favicon.ico'
