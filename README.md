@@ -1,5 +1,8 @@
 # 3D-Game-of-Life version 1.6
 A Web-Based 3D Implementation of John Conway’s Game of Life Cellular Automaton (Final Year Project)
+[![GitHub version](https://img.shields.io/github/v/release/SamuelTribeUK/3D-Game-of-Life.svg)](https://github.com/SamuelTribeUK/3D-Game-of-Life/releases/latest)
+[![License](https://img.shields.io/github/license/SamuelTribeUK/3D-Game-of-Life.svg)](LICENSE)
+[![Website status](https://img.shields.io/website?down_color=red&down_message=offline&up_color=green&up_message=online&url=https%3A%2F%2Fgol.samueltribe.com)](https://gol.samueltribe.com/)
 
 This is the git repository for my final year university project. This project aims to create a web-based 3D version of the game of life cellular automaton (https://www.conwaylife.com/)
 
