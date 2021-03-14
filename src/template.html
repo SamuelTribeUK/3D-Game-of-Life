@@ -3,47 +3,72 @@
 <head>
 	<meta charset="UTF-8">
 	<title><%= htmlWebpackPlugin.options.title %></title>
-	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>
 <div id="settingsPanel" class="settingsPanel">
-	<a id="closebtn" href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+	<h1>Settings</h1>
+	<a id="closebtn" href="javascript:void(0)" class="closebtn" onclick="closeSettings()">&times;</a>
 	<button class="stopStart" id="stopStart">Start</button>
 	<button class="step" id="step">Step</button>
+	<button class="reset" id="reset">Reset</button>
 	<div class="gameInfo">
 		<p id="status"></p>
 		<p id="iterations"></p>
 	</div>
 	<div class="orbitToggle">
-		<label class="orbitBox" for="orbitControls">Orbit Controls:</label>
+		<label class="orbitBoxLabel" for="orbitControls">Orbit Controls:</label>
 		<input class="orbitBox" type="checkbox" id="orbitControls"/><br>
 	</div>
 
+	<div class="hideDeadToggle">
+		<label class="hideDeadBoxLabel" for="hideDeadBox">Hide Dead Cells:</label>
+		<input class="hideDeadBox" type="checkbox" id="hideDeadBox"/><br>
+	</div>
+
+	<label for="presets" class="presetsLabel">Presets:</label>
+	<select id="presets" name="presets" class="presets">
+		<option value="Random">Custom (set dimensions below)</option>
+		<option value="Blinker B45/S5">Blinker B45/S5</option>
+		<option value="Accordion Replicator B45/S5">Accordion Replicator B45/S5</option>
+		<option value="Carter Bays Glider B6/S567">Carter Bays Glider B6/S567</option>
+	</select>
+	<br>
+	<label for="presetRules" class="rulesLabel">Rules:</label>
+	<select id="presetRules" name="rules" class="rules">
+		<option value="Standard">2D Rules (B3/S23)</option>
+		<option value="B45/S5">B45/S5</option>
+		<option value="B36/S23">B36/S23</option>
+		<option value="B6/S567">B6/S567</option>
+	</select>
+	<br>
 	<form class="inputForm">
 		<div class="Inputs">
-			<label class="inputLabel" for="xSizeInput">x Size:</label>
+			<label class="inputLabel" for="xSizeInput">x Size:		</label>
 			<input class="inputField" type="number" id="xSizeInput" min="1" required>
 		</div>
 		<br>
 		<div class="Inputs">
-			<label class="inputLabel" for="ySizeInput">y Size:</label>
+			<label class="inputLabel" for="ySizeInput">y Size:			</label>
 			<input class="inputField" type="number" id="ySizeInput" min="1" required>
 		</div>
 		<br>
 		<div class="Inputs">
-			<label class="inputLabel" for="zSizeInput">z Size:</label>
+			<label class="inputLabel" for="zSizeInput">z Size:			</label>
 			<input class="inputField" type="number" id="zSizeInput" min="1" required>
 		</div>
 		<br>
 		<div class="Inputs">
-			<label class="inputLabel" for="timeoutInput">Speed:</label>
-			<input class="inputField" type="number" id="timeoutInput" min="0.1" step="0.1" required>
+			<label class="timeoutInputLabel" for="timeoutInput" id="timeoutInputLabel">Speed:</label>
+			<input class="timeInput" type="number" id="timeoutInput" min="0.1" step="0.1" required>
 		</div>
 
 		<div class="submitValues">
 			<input class="updateButton" type="submit" id="submit" value="Update">
 		</div>
 	</form>
+	<button class="jsonBtn" id="jsonBtn">show JSON</button>
+	<textarea class="jsonTextInput" id="jsonTextInput"></textarea>
+	<button class="jsonLoadBtn" id="jsonLoadBtn">Load JSON game</button>
 	<div class="generalInfo">
 		<p>This is a 3D implementation of <br> <a href="https://conwaylife.com/wiki/Main_Page" target="_blank">Conway's Game of Life</a></p>
 		<br>

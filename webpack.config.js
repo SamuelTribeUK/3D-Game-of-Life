@@ -16,12 +16,20 @@ module.exports = {
 				test: /\.css$/i,
 				use: ['style-loader', 'css-loader'],
 			},
+			{
+				test: /\.(ttf)$/,
+				use: { loader: 'file-loader' }
+			},
+			{
+				test: /\.worker\.js$/,
+				use: { loader: "worker-loader"},
+			},
 		],
 	},
 	plugins: [
 		new HtmlWebpackPlugin({
 			title: '3D Game of Life - Samuel Tribe',
-			version: '1.0',
+			version: '1.6',
 			template: path.resolve(__dirname, './src/template.html'),
 			filename: 'index.html',
 			favicon: 'src/assets/images/favicon.ico'
