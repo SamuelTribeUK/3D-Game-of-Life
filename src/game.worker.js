@@ -1,6 +1,7 @@
 // workerFakeDOM.js is from StackOverflow to allow jQuery in web worker. See file for more info
 import "./workerFakeDOM.js";
-let $ = require('jquery/src/core');
+import $ from "jquery";
+
 
 let xSize,ySize,zSize;
 let gameArray;
@@ -16,7 +17,7 @@ let gameArray;
  * using postMessage.
  * @param message - The message from the main script, containing the gameArray, dimensions of the grid and the ruleset.
  */
-function workerOnMessage(message) {
+export function workerOnMessage(message) {
 	let changed = false;
 	// 3D array passed as message.data[0], process each cell within this array
 	gameArray = message.data[0];
@@ -75,10 +76,13 @@ function workerOnMessage(message) {
 			}
 		}
 	}
-	postMessage([newGameArray,changed]);
+	return [newGameArray,changed];
 }
 
-onmessage = workerOnMessage;
+self.onmessage = function(message) {
+	let result = workerOnMessage(message);
+	postMessage(result);
+}
 
 /**
  * The liveCount function takes x, y and z coordinates and checks how many live neighbours that cell has using the
@@ -125,3 +129,5 @@ function checkCell(x, y, z) {
 		return 0;
 	}
 }
+
+export default workerOnMessage;
