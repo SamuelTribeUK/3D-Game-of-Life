@@ -219,7 +219,6 @@ function attachClickEvents()  {
 	document.getElementById("jsonBtn").onclick = showHideJSON;
 	document.getElementById("jsonLoadBtn").onclick = loadJSON;
 
-	//
 	window.addEventListener("resize", resizeListener);
 }
 
@@ -354,7 +353,7 @@ function enableOrbit() {
  * settings panel. The updateColours function is then called so the dead cells are hidden immediately.
  */
 function showHideDeadCells() {
-	hideDead = document.getElementById("hideDeadBox").value;
+	hideDead = document.getElementById("hideDeadBox").checked;
 	updateColours();
 }
 
