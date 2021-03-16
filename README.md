@@ -1,6 +1,10 @@
 # 3D-Game-of-Life version 1.6
 A Web-Based 3D Implementation of John Conway’s Game of Life Cellular Automaton (Final Year Project)
 
+[![GitHub version](https://img.shields.io/github/v/release/SamuelTribeUK/3D-Game-of-Life.svg)](https://github.com/SamuelTribeUK/3D-Game-of-Life/releases/latest)
+[![License](https://img.shields.io/github/license/SamuelTribeUK/3D-Game-of-Life.svg)](LICENSE)
+[![Website status](https://img.shields.io/website?down_color=red&down_message=offline&up_color=green&up_message=online&url=https%3A%2F%2Fgol.samueltribe.com)](https://gol.samueltribe.com/)
+
 This is the git repository for my final year university project. This project aims to create a web-based 3D version of the game of life cellular automaton (https://www.conwaylife.com/)
 
 Version 1.0 allows users to create custom grid sizes and game speeds, stop and start the game, and step through a single iteration. Notifications are displayed using toastify-js when settings are invalid or if the settings might cause lag.
@@ -31,7 +35,7 @@ The preferred font used for the site is Cascadia Code (https://github.com/micros
 
 ## Presets and Rules
 As of v 1.5, there are 4 pre-set options:
-1. Custom (This is the standard random starting config with dimensions and speed user specified)
+1. Custom (This is the standard random starting config with dimensions and speed user-specified)
 2. Blinker B45/S5 (This was implemented based on http://rbeaulieu.github.io/3DGameOfLife/)
 3. Accordion Replicator B45/S5 (This was implemented based on http://rbeaulieu.github.io/3DGameOfLife/)
 4. Carter Bays Glider B6/S567 (This was implemented based on "Candidates for the Game of Life in Three Dimensions" by Carter Bays, published in the first edition of the Complex Systems Journal 1987 (373-400))
@@ -45,3 +49,4 @@ As of v 1.6, jsdoc has been included as a dev dependency and every function in t
 As of v1.7, Jest has been included as a dev dependency and is configured to be able to test the game.worker.js file. Big thanks to smpeters on GitHub (https://github.com/smpeters) for providing instructions on getting jest working with the style of imports I was using, the full page can be found here: https://github.com/facebook/jest/issues/9395
 
 Another big thanks to Andrea Stagi for making a package that transforms web workers into the correct format so they can be tested using Jest. I found this at the bottom of the article they wrote here: https://vuedose.tips/how-to-test-web-workers-with-jest/
+
