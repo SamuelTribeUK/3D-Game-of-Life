@@ -34,6 +34,11 @@ let gameBoard;
 let gameArray;
 let startingArray;
 let worker;
+let rules = {
+	birth: [3],
+	survive: [2,3],
+	max: 3,
+};
 
 let liveCellColour = "#c24d2c";
 let deadCellColour = "#d9dad7";
@@ -57,14 +62,13 @@ let light = new AmbientLight(0xFFFFFF,1);
  * stopped. The settings panel and cube colours are then updated with their respective functions.
  */
 function simulateStep() {
-	let ruleset = document.getElementById("presetRules").value;
 	// If web workers are allowed in the browser then run code on game.worker.js
 	if (window.Worker) {
 		// This is just in case the web worker was terminated, a new web worker will be created
 		if (!worker) {
 			worker = new Worker();
 		}
-		worker.postMessage([gameArray,xSize,ySize,zSize,ruleset]);
+		worker.postMessage([gameArray,xSize,ySize,zSize,rules.birth,rules.survive,rules.max]);
 	} else {
 		console.log("Browser does not support web workers, cannot run");
 		notify("Incompatible browser! please use a modern browser such as Chrome or Firefox","error",10000);
@@ -179,6 +183,39 @@ function addMesh(state,i,j,k) {
 }
 
 /**
+ * The rulesetSelect function is executed when the ruleset drop-down selector is changed. The rules object is updated
+ * with new birth, survive and max values representing the rules of the game. The birth and survive properties of the
+ * rules object are arrays of integers, e.g. B45/S5 would have rules.birth = [4,5] and rules.survive = [5]. rules.max is
+ * the highest value from these arrays.
+ */
+function rulesetSelect() {
+	let ruleset = document.getElementById("presetRules").value;
+	switch (ruleset) {
+		case "Standard": {
+			rules.birth = [3];
+			rules.survive = [2,3];
+			rules.max = 3;
+			break;
+		} case "B45/S5": {
+			rules.birth = [4,5];
+			rules.survive = [5];
+			rules.max = 5;
+			break;
+		} case "B36/S23": {
+			rules.birth = [3,6];
+			rules.survive = [2,3];
+			rules.max = 6;
+			break;
+		} case "B6/S567": {
+			rules.birth = [6];
+			rules.survive = [5,6,7];
+			rules.max = 7;
+			break;
+		}
+	}
+}
+
+/**
  * The attachClickEvents function adds all of the appropriate functions as eventListeners for the settings Panel. The
  * input fields are populated with the initial values.
  * */
@@ -202,6 +239,9 @@ function attachClickEvents()  {
 
 	element = document.getElementById("presets");
 	element.addEventListener("change", presetSelect);
+
+	element = document.getElementById("presetRules");
+	element.addEventListener("change", rulesetSelect);
 
 	element = document.getElementById("xSizeInput");
 	element.value = xSize;
@@ -598,7 +638,7 @@ function doDispose(obj) {
 function presetSelect() {
 	let preset = document.getElementById("presets").value;
 	let updateBtn = document.getElementById("submit");
-	let rules = document.getElementById("presetRules");
+	let ruleset = document.getElementById("presetRules");
 
 	let dimensionInputs = document.getElementsByClassName("inputField");
 
@@ -615,7 +655,10 @@ function presetSelect() {
 			for (let i = 0; i < dimensionInputs.length; i++) {
 				dimensionInputs[i].disabled = true;
 			}
-			rules.value = "B45/S5";
+			ruleset.value = "B45/S5";
+			rules.birth = [4,5];
+			rules.survive = [5];
+			rules.max = [5];
 			updateBtn.disabled = true;
 
 			let blinkerArray = [[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
@@ -645,7 +688,11 @@ function presetSelect() {
 				dimensionInputs[i].disabled = true;
 			}
 
-			rules.value = "B45/S5";
+			ruleset.value = "B45/S5";
+
+			rules.birth = [4,5];
+			rules.survive = [5];
+			rules.max = 5;
 
 			updateBtn.disabled = true;
 
@@ -677,7 +724,11 @@ function presetSelect() {
 				dimensionInputs[i].disabled = true;
 			}
 
-			rules.value = "B6/S567";
+			ruleset.value = "B6/S567";
+
+			rules.birth = [6];
+			rules.survive = [5,6,7];
+			rules.max = 7;
 
 			updateBtn.disabled = true;
 
@@ -797,7 +848,7 @@ function loadJSON() {
  * The newGameFromJSON function takes a json parsed array and the timeInput and creates a new game from the jsonArray.
  * This code is similar to the newRandomGame function, however the xSize, ySize and zSize are determined from the length
  * of each dimension in the jsonArray.
- * @param {Array<number>} jsonArray - The new gameArray taken from the JSON input textarea
+ * @param {number[][][]} jsonArray - The new gameArray taken from the JSON input textarea
  * @param {number} timeInput - The updated timeInput value from the settings panel
  */
 function newGameFromJSON(jsonArray,timeInput) {
