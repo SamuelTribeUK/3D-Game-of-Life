@@ -74,7 +74,7 @@ function liveCount(x,y,z,max) {
 				if (!((l === 0) && (m === 0) && (n === 0))) {
 					liveNum += checkCell(x+l, y+m, z+n);
 					if (liveNum > max) {
-						break;
+						return liveNum;
 					}
 				}
 			}
