@@ -1,4 +1,4 @@
-# 3D-Game-of-Life version 1.7.1
+# 3D-Game-of-Life version 1.8
 A Web-Based 3D Implementation of John Conway’s Game of Life Cellular Automaton (Final Year Project)
 
 [![GitHub version](https://img.shields.io/github/v/release/SamuelTribeUK/3D-Game-of-Life.svg)](https://github.com/SamuelTribeUK/3D-Game-of-Life/releases/latest)
