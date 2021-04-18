@@ -1,12 +1,11 @@
 import {
-	AmbientLight,
 	BoxGeometry,
 	EdgesGeometry,
 	LineBasicMaterial,
 	LineSegments,
 	Mesh,
 	MeshLambertMaterial,
-	PerspectiveCamera,
+	PerspectiveCamera, PointLight,
 	Scene,
 	Vector3,
 	WebGLRenderer,
@@ -54,7 +53,7 @@ let scene = new Scene();
 let camera = new PerspectiveCamera(75, (window.innerWidth)/(window.innerHeight), 0.1, 1000);
 let renderer = new WebGLRenderer({antialias: true, canvas: canvas});
 let controls;
-let light = new AmbientLight(0xFFFFFF,1);
+let light = new PointLight(0xFFFFFF,1);
 
 /**
  * The simulateStep function uses the game.worker.js web worker to deep copy the current gameArray and calculate the
@@ -78,8 +77,8 @@ function simulateStep() {
 
 /**
  * The setupScene function creates a new scene matching the dimensions of the window. A wire-frame cube is drawn using
- * LineSegments to represent the boundaries of the grid. An ambient light is added to the scene, this is so shadows
- * don't cause confusion over cell states.
+ * LineSegments to represent the boundaries of the grid. The camera is added to the scene, this contains the light
+ * source for the scene (a PointLight) that moves with the camera.
  */
 function setupScene() {
 
@@ -95,7 +94,7 @@ function setupScene() {
 
 	scene.add(wireframe);
 
-	scene.add(light);
+	scene.add(camera);
 }
 
 /**
@@ -699,6 +698,7 @@ function newGameBoard(event) {
 	} else {
 		render();
 	}
+	updateColours();
 }
 
 /**
@@ -1026,6 +1026,7 @@ function onload() {
 	worker = new Worker();
 
 	worker.onmessage = onMessage;
+
 	camera.position.z = Math.max(xSize,ySize,zSize) * 1.5;
 
 	camera.position.x = xSize * 1.5;
@@ -1047,7 +1048,7 @@ function onload() {
 
 let existingOnload = window.onload;
 window.onload = onload;
-
+camera.add(light);
 setupScene();
 newRandomBoard();
 
