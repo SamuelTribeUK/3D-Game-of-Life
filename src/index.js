@@ -190,28 +190,123 @@ function addMesh(state,i,j,k) {
  */
 function rulesetSelect() {
 	let ruleset = document.getElementById("presetRules").value;
+	let birthConditions = document.getElementById("birthInput");
+	let surviveConditions = document.getElementById("surviveInput");
+	let updateRulesButton = document.getElementById("updateCustomRulesButton");
+	let customText = document.getElementById("presetRules");
 	switch (ruleset) {
 		case "Standard": {
+			birthConditions.readOnly = true;
+			surviveConditions.readOnly = true;
+			updateRulesButton.disabled = true;
+			customText.options[customText.length - 1].text = "custom";
 			rules.birth = [3];
-			rules.survive = [2,3];
+			birthConditions.value = "3";
+			rules.survive = [2, 3];
+			surviveConditions.value = "2,3";
 			rules.max = 3;
 			break;
-		} case "B45/S5": {
-			rules.birth = [4,5];
+		}
+		case "B45/S5": {
+			birthConditions.readOnly = true;
+			surviveConditions.readOnly = true;
+			updateRulesButton.disabled = true;
+			customText.options[customText.length - 1].text = "custom";
+			rules.birth = [4, 5];
+			birthConditions.value = "4,5";
 			rules.survive = [5];
+			surviveConditions.value = "5";
 			rules.max = 5;
 			break;
-		} case "B36/S23": {
-			rules.birth = [3,6];
-			rules.survive = [2,3];
+		}
+		case "B36/S23": {
+			birthConditions.readOnly = true;
+			surviveConditions.readOnly = true;
+			updateRulesButton.disabled = true;
+			customText.options[customText.length - 1].text = "custom";
+			rules.birth = [3, 6];
+			birthConditions.value = "3,6";
+			rules.survive = [2, 3];
+			surviveConditions.value = "2,3";
 			rules.max = 6;
 			break;
-		} case "B6/S567": {
+		}
+		case "B6/S567": {
+			birthConditions.readOnly = true;
+			surviveConditions.readOnly = true;
+			updateRulesButton.disabled = true;
+			customText.options[customText.length - 1].text = "custom";
 			rules.birth = [6];
-			rules.survive = [5,6,7];
+			birthConditions.value = "6";
+			rules.survive = [5, 6, 7];
+			surviveConditions.value = "5,6,7";
 			rules.max = 7;
 			break;
 		}
+		case "custom": {
+			birthConditions.readOnly = false;
+			surviveConditions.readOnly = false;
+			updateRulesButton.disabled = false;
+			customText.options[customText.length - 1].text = "custom *";
+		}
+	}
+}
+
+/**
+ * The updateCustomRules function executes when the custom rules preset is selected and the update custom rules button
+ * is clicked. The birth and survive inputs are parsed to ensure they are integers separated by commas. The only
+ * input validation besides the integer parsing is that all numbers must be >=0. The rules object is updated with the
+ * new values and a success notification is shown.
+ * @returns {boolean} - false is returned if the inputted values are not valid numbers or if the format is unrecognised.
+ */
+function updateCustomRules() {
+	event.preventDefault(); // This stops the form from submitting and refreshing the page
+	let birthInput = document.getElementById("birthInput");
+	let surviveInput = document.getElementById("surviveInput");
+	try {
+
+		let tempBirth = birthInput.value.split(",");
+		for (const a in tempBirth) {
+			tempBirth[a] = parseInt(tempBirth[a],10);
+			if (isNaN(tempBirth[a])) {
+				notify("Invalid rule format!","error",3000);
+				return false;
+			} else if (tempBirth[a] < 0) {
+				notify("Rule values must be positive","error",3000);
+				return false;
+			}
+		}
+
+		let tempSurvive = surviveInput.value.split(",");
+		for (const a in tempSurvive) {
+			tempSurvive[a] = parseInt(tempSurvive[a],10);
+			if (isNaN(tempSurvive[a])) {
+				notify("Invalid rule format!","error",3000);
+				return false;
+			} else if (tempSurvive[a] < 0) {
+				notify("Rule values must be positive","error",3000);
+				return false;
+			}
+		}
+
+		rules.birth = tempBirth;
+		rules.survive = tempSurvive;
+		rules.max = Math.max(...rules.birth,...rules.survive);
+
+		birthInput.value = rules.birth.toString();
+		surviveInput.value = rules.survive.toString();
+
+		console.log(rules.birth);
+		console.log(rules.survive);
+		console.log(rules.max);
+
+		notify("Rules updated","success",3000);
+
+		let customOption = document.getElementById("presetRules");
+		customOption.options[customOption.length-1].text = "custom";
+	} catch (e) {
+		console.log("Error with birth/survive inputs");
+		notify("Rules update failed!","error",3000);
 	}
 }
 
@@ -242,6 +337,14 @@ function attachClickEvents()  {
 
 	element = document.getElementById("presetRules");
 	element.addEventListener("change", rulesetSelect);
+
+	element = document.getElementById("updateCustomRulesButton");
+	element.addEventListener("click", updateCustomRules);
+
+	element = document.getElementById("birthInput");
+	element.value = "3";
+	element = document.getElementById("surviveInput");
+	element.value = "2,3";
 
 	element = document.getElementById("xSizeInput");
 	element.value = xSize;

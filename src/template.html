@@ -39,9 +39,19 @@
 		<option value="B45/S5">B45/S5</option>
 		<option value="B36/S23">B36/S23</option>
 		<option value="B6/S567">B6/S567</option>
+		<option value="custom">custom</option>
 	</select>
 	<br>
 	<form class="inputForm">
+		<div class="Inputs">
+			<label class="birthInputLabel" for="birthInput">Birth:</label>
+			<input class="rulesInputField" type="text" id="birthInput" readonly>
+		</div>
+		<div class="Inputs">
+			<label class="surviveInputLabel" for="surviveInput">Survive:</label>
+			<input class="rulesInputField" type="text" id="surviveInput" readonly>
+		</div>
+		<button class="updateCustomRulesButton" id="updateCustomRulesButton" disabled>Update custom rules</button>
 		<div class="Inputs">
 			<label class="inputLabel" for="xSizeInput">x Size:		</label>
 			<input class="inputField" type="number" id="xSizeInput" min="1" required>
