@@ -295,16 +295,11 @@ function updateCustomRules() {
 		birthInput.value = rules.birth.toString();
 		surviveInput.value = rules.survive.toString();
 
-		console.log(rules.birth);
-		console.log(rules.survive);
-		console.log(rules.max);
-
 		notify("Rules updated","success",3000);
 
 		let customOption = document.getElementById("presetRules");
 		customOption.options[customOption.length-1].text = "custom";
 	} catch (e) {
-		console.log("Error with birth/survive inputs");
 		notify("Rules update failed!","error",3000);
 	}
 }
