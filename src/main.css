@@ -65,15 +65,41 @@ h1 {
     display: block;
     transition: 0.3s;
 }
+.rulesInputLabel {
+    margin-right: 0;
+}
+
+.rulesInputField {
+    width: 100px;
+    float: right;
+    display: block;
+}
 
 .timeoutInputLabel {
     margin-right: 85px;
 }
 
-.inputForm input[type="number"] {
+.inputForm input[type="number"], input[type="text"] {
     display: block;
     float: right;
     height: 13px;
+    width: 50px;
+}
+
+input[type="text"] {
+    width: 65px;
+}
+
+.birthInputLabel {
+    margin-right: 69px;
+}
+
+.surviveInputLabel {
+    margin-right: 50px;
+}
+
+.updateCustomRulesButton {
+    margin-bottom: 5px;
 }
 
 .closebtn {
@@ -97,7 +123,7 @@ h1 {
     display: inline-block;
 }
 
-.jsonBtn, .jsonTextInput, .jsonLoadBtn {
+.jsonBtn, .jsonTextInput, .jsonLoadBtn, .updateCustomRulesButton {
     margin-top: 5px;
     width: 100%;
     height: auto;
@@ -161,10 +187,6 @@ h1 {
     text-decoration: none;
     text-align: center;
     transition: all 0.2s;
-}
-
-input[type="number"] {
-    width: 50px;
 }
 
 .stopStart, .step, .reset {

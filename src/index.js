@@ -1,12 +1,11 @@
 import {
-	AmbientLight,
 	BoxGeometry,
 	EdgesGeometry,
 	LineBasicMaterial,
 	LineSegments,
 	Mesh,
 	MeshLambertMaterial,
-	PerspectiveCamera,
+	PerspectiveCamera, PointLight,
 	Scene,
 	Vector3,
 	WebGLRenderer,
@@ -34,6 +33,11 @@ let gameBoard;
 let gameArray;
 let startingArray;
 let worker;
+let rules = {
+	birth: [3],
+	survive: [2,3],
+	max: 3,
+};
 
 let liveCellColour = "#c24d2c";
 let deadCellColour = "#d9dad7";
@@ -49,7 +53,7 @@ let scene = new Scene();
 let camera = new PerspectiveCamera(75, (window.innerWidth)/(window.innerHeight), 0.1, 1000);
 let renderer = new WebGLRenderer({antialias: true, canvas: canvas});
 let controls;
-let light = new AmbientLight(0xFFFFFF,1);
+let light = new PointLight(0xFFFFFF,1);
 
 /**
  * The simulateStep function uses the game.worker.js web worker to deep copy the current gameArray and calculate the
@@ -57,14 +61,13 @@ let light = new AmbientLight(0xFFFFFF,1);
  * stopped. The settings panel and cube colours are then updated with their respective functions.
  */
 function simulateStep() {
-	let ruleset = document.getElementById("presetRules").value;
 	// If web workers are allowed in the browser then run code on game.worker.js
 	if (window.Worker) {
 		// This is just in case the web worker was terminated, a new web worker will be created
 		if (!worker) {
 			worker = new Worker();
 		}
-		worker.postMessage([gameArray,xSize,ySize,zSize,ruleset]);
+		worker.postMessage([gameArray,xSize,ySize,zSize,rules.birth,rules.survive,rules.max]);
 	} else {
 		console.log("Browser does not support web workers, cannot run");
 		notify("Incompatible browser! please use a modern browser such as Chrome or Firefox","error",10000);
@@ -74,8 +77,8 @@ function simulateStep() {
 
 /**
  * The setupScene function creates a new scene matching the dimensions of the window. A wire-frame cube is drawn using
- * LineSegments to represent the boundaries of the grid. An ambient light is added to the scene, this is so shadows
- * don't cause confusion over cell states.
+ * LineSegments to represent the boundaries of the grid. The camera is added to the scene, this contains the light
+ * source for the scene (a PointLight) that moves with the camera.
  */
 function setupScene() {
 
@@ -91,7 +94,7 @@ function setupScene() {
 
 	scene.add(wireframe);
 
-	scene.add(light);
+	scene.add(camera);
 }
 
 /**
@@ -179,6 +182,129 @@ function addMesh(state,i,j,k) {
 }
 
 /**
+ * The rulesetSelect function is executed when the ruleset drop-down selector is changed. The rules object is updated
+ * with new birth, survive and max values representing the rules of the game. The birth and survive properties of the
+ * rules object are arrays of integers, e.g. B45/S5 would have rules.birth = [4,5] and rules.survive = [5]. rules.max is
+ * the highest value from these arrays.
+ */
+function rulesetSelect() {
+	let ruleset = document.getElementById("presetRules").value;
+	let birthConditions = document.getElementById("birthInput");
+	let surviveConditions = document.getElementById("surviveInput");
+	let updateRulesButton = document.getElementById("updateCustomRulesButton");
+	let customText = document.getElementById("presetRules");
+	switch (ruleset) {
+		case "Standard": {
+			birthConditions.readOnly = true;
+			surviveConditions.readOnly = true;
+			updateRulesButton.disabled = true;
+			customText.options[customText.length - 1].text = "custom";
+			rules.birth = [3];
+			birthConditions.value = "3";
+			rules.survive = [2, 3];
+			surviveConditions.value = "2,3";
+			rules.max = 3;
+			break;
+		}
+		case "B45/S5": {
+			birthConditions.readOnly = true;
+			surviveConditions.readOnly = true;
+			updateRulesButton.disabled = true;
+			customText.options[customText.length - 1].text = "custom";
+			rules.birth = [4, 5];
+			birthConditions.value = "4,5";
+			rules.survive = [5];
+			surviveConditions.value = "5";
+			rules.max = 5;
+			break;
+		}
+		case "B36/S23": {
+			birthConditions.readOnly = true;
+			surviveConditions.readOnly = true;
+			updateRulesButton.disabled = true;
+			customText.options[customText.length - 1].text = "custom";
+			rules.birth = [3, 6];
+			birthConditions.value = "3,6";
+			rules.survive = [2, 3];
+			surviveConditions.value = "2,3";
+			rules.max = 6;
+			break;
+		}
+		case "B6/S567": {
+			birthConditions.readOnly = true;
+			surviveConditions.readOnly = true;
+			updateRulesButton.disabled = true;
+			customText.options[customText.length - 1].text = "custom";
+			rules.birth = [6];
+			birthConditions.value = "6";
+			rules.survive = [5, 6, 7];
+			surviveConditions.value = "5,6,7";
+			rules.max = 7;
+			break;
+		}
+		case "custom": {
+			birthConditions.readOnly = false;
+			surviveConditions.readOnly = false;
+			updateRulesButton.disabled = false;
+			customText.options[customText.length - 1].text = "custom *";
+		}
+	}
+}
+
+/**
+ * The updateCustomRules function executes when the custom rules preset is selected and the update custom rules button
+ * is clicked. The birth and survive inputs are parsed to ensure they are integers separated by commas. The only
+ * input validation besides the integer parsing is that all numbers must be >=0. The rules object is updated with the
+ * new values and a success notification is shown.
+ * @returns {boolean} - false is returned if the inputted values are not valid numbers or if the format is unrecognised.
+ */
+function updateCustomRules() {
+	event.preventDefault(); // This stops the form from submitting and refreshing the page
+	let birthInput = document.getElementById("birthInput");
+	let surviveInput = document.getElementById("surviveInput");
+	try {
+
+		let tempBirth = birthInput.value.split(",");
+		for (const a in tempBirth) {
+			tempBirth[a] = parseInt(tempBirth[a],10);
+			if (isNaN(tempBirth[a])) {
+				notify("Invalid rule format!","error",3000);
+				return false;
+			} else if (tempBirth[a] < 0) {
+				notify("Rule values must be positive","error",3000);
+				return false;
+			}
+		}
+
+		let tempSurvive = surviveInput.value.split(",");
+		for (const a in tempSurvive) {
+			tempSurvive[a] = parseInt(tempSurvive[a],10);
+			if (isNaN(tempSurvive[a])) {
+				notify("Invalid rule format!","error",3000);
+				return false;
+			} else if (tempSurvive[a] < 0) {
+				notify("Rule values must be positive","error",3000);
+				return false;
+			}
+		}
+
+		rules.birth = tempBirth;
+		rules.survive = tempSurvive;
+		rules.max = Math.max(...rules.birth,...rules.survive);
+
+		birthInput.value = rules.birth.toString();
+		surviveInput.value = rules.survive.toString();
+
+		notify("Rules updated","success",3000);
+
+		let customOption = document.getElementById("presetRules");
+		customOption.options[customOption.length-1].text = "custom";
+	} catch (e) {
+		notify("Rules update failed!","error",3000);
+	}
+}
+
+/**
  * The attachClickEvents function adds all of the appropriate functions as eventListeners for the settings Panel. The
  * input fields are populated with the initial values.
  * */
@@ -202,6 +328,17 @@ function attachClickEvents()  {
 
 	element = document.getElementById("presets");
 	element.addEventListener("change", presetSelect);
+
+	element = document.getElementById("presetRules");
+	element.addEventListener("change", rulesetSelect);
+
+	element = document.getElementById("updateCustomRulesButton");
+	element.addEventListener("click", updateCustomRules);
+
+	element = document.getElementById("birthInput");
+	element.value = "3";
+	element = document.getElementById("surviveInput");
+	element.value = "2,3";
 
 	element = document.getElementById("xSizeInput");
 	element.value = xSize;
@@ -556,6 +693,7 @@ function newGameBoard(event) {
 	} else {
 		render();
 	}
+	updateColours();
 }
 
 /**
@@ -598,7 +736,7 @@ function doDispose(obj) {
 function presetSelect() {
 	let preset = document.getElementById("presets").value;
 	let updateBtn = document.getElementById("submit");
-	let rules = document.getElementById("presetRules");
+	let ruleset = document.getElementById("presetRules");
 
 	let dimensionInputs = document.getElementsByClassName("inputField");
 
@@ -615,7 +753,10 @@ function presetSelect() {
 			for (let i = 0; i < dimensionInputs.length; i++) {
 				dimensionInputs[i].disabled = true;
 			}
-			rules.value = "B45/S5";
+			ruleset.value = "B45/S5";
+			rules.birth = [4,5];
+			rules.survive = [5];
+			rules.max = [5];
 			updateBtn.disabled = true;
 
 			let blinkerArray = [[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
@@ -645,7 +786,11 @@ function presetSelect() {
 				dimensionInputs[i].disabled = true;
 			}
 
-			rules.value = "B45/S5";
+			ruleset.value = "B45/S5";
+
+			rules.birth = [4,5];
+			rules.survive = [5];
+			rules.max = 5;
 
 			updateBtn.disabled = true;
 
@@ -677,7 +822,11 @@ function presetSelect() {
 				dimensionInputs[i].disabled = true;
 			}
 
-			rules.value = "B6/S567";
+			ruleset.value = "B6/S567";
+
+			rules.birth = [6];
+			rules.survive = [5,6,7];
+			rules.max = 7;
 
 			updateBtn.disabled = true;
 
@@ -797,7 +946,7 @@ function loadJSON() {
  * The newGameFromJSON function takes a json parsed array and the timeInput and creates a new game from the jsonArray.
  * This code is similar to the newRandomGame function, however the xSize, ySize and zSize are determined from the length
  * of each dimension in the jsonArray.
- * @param {Array<number>} jsonArray - The new gameArray taken from the JSON input textarea
+ * @param {number[][][]} jsonArray - The new gameArray taken from the JSON input textarea
  * @param {number} timeInput - The updated timeInput value from the settings panel
  */
 function newGameFromJSON(jsonArray,timeInput) {
@@ -872,6 +1021,7 @@ function onload() {
 	worker = new Worker();
 
 	worker.onmessage = onMessage;
+
 	camera.position.z = Math.max(xSize,ySize,zSize) * 1.5;
 
 	camera.position.x = xSize * 1.5;
@@ -893,7 +1043,7 @@ function onload() {
 
 let existingOnload = window.onload;
 window.onload = onload;
-
+camera.add(light);
 setupScene();
 newRandomBoard();
 

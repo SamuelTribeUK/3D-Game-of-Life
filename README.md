@@ -23,6 +23,8 @@ Version 1.6 was a back-end update that added jsdoc comments to every function in
 
 Version 1.7 provided a back-end update that implemented the Jest testing framework and 10 tests. At the moment, only the workerOnMessage function in game.worker.js is tested. This is to ensure correctness with the algorithm in case of any changes made in the future. 1.7.1 fixed a bug with dead cells not showing after unticking the checkbox.
 
+Version 1.8 added custom rule input in the format Birth:[array of integers] Survive:[array of integers] within their respective text inputs. The only validation that occurs is to ensure the values are numbers and are >= 0.
+
 ## How to deploy to the webserver
 After the new configuration changes and new files added in wip-core-server, the project can now be deployed to a web server. For this project, I am using an IONOS VPS running Ubuntu 20.04, I use Nginx configured to use port 3000 as this is the node application port for my project and it is fully configured with SSL and a domain (gol.samueltribe.com).
 

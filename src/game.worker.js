@@ -9,13 +9,13 @@ let gameArray;
 /**
  * The workerOnMessage function is executed when a message from the main script is received. It unpacks the message into
  * the gameArray (message.data[0]), xSize (message.data[1]), ySize (message.data[2]), zSize (message.data[3]) and
- * ruleset (message.data[4]). Each cell of the gameArray is iterated over, calculating the number of live (1)
- * neighbouring cell states using the liveCount function. A switch case statement is then used for the ruleset, with
- * each ruleset dictating how many live neighbours are required for birth or survival and the changes made to a new
- * deep-copy array of the gameArray (this ensures no conflicts). Once the newGameArray has been fully implemented it is
- * sent back to the main script along with the changed value (being false if no cells changed state and true otherwise)
- * using postMessage.
- * @param message - The message from the main script, containing the gameArray, dimensions of the grid and the ruleset.
+ * the rules object (spread over message.data[4, 5 and 6]). Each cell of the gameArray is iterated over, calculating the
+ * number of live (1) neighbouring cell states using the liveCount function. The rules object is used to dictate the new
+ * states of cells, with each ruleset dictating how many live neighbours are required for birth or survival and the
+ * changes made to a new deep-copy array of the gameArray (this ensures no conflicts). Once the newGameArray has been
+ * fully implemented it is sent back to the main script along with the changed value (being false if no cells changed
+ * state and true otherwise) using postMessage.
+ * @param message - The message from the main script, containing the gameArray, dimensions of the grid and the rules.
  */
 export function workerOnMessage(message) {
 	let changed = false;
@@ -26,52 +26,23 @@ export function workerOnMessage(message) {
 	xSize = message.data[1];
 	ySize = message.data[2];
 	zSize = message.data[3];
-	let ruleset = message.data[4];
+	let rules = {
+		birth: message.data[4],
+		survive: message.data[5],
+		max: message.data[6],
+	};
 
 	for (let i = 0; i < xSize; i++) {
 		for (let j = 0; j < ySize; j++) {
 			for (let k = 0; k < zSize; k++) {
-				let liveNum = liveCount(i, j, k);
+				let liveNum = liveCount(i, j, k, rules.max);
 
-				switch (ruleset) {
-					case "Standard": {
-						// B3/S23 (Standard 2D GoL)
-						if ((liveNum === 3) && gameArray[i][j][k] === 0) {
-							changed = true;
-							newGameArray[i][j][k] = 1;
-						} else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
-							changed = true;
-							newGameArray[i][j][k] = 0;
-						}
-						break;
-					} case "B45/S5": {
-						// B45/S5
-						if ((liveNum === 4 || liveNum === 5) && gameArray[i][j][k] === 0) {
-							changed = true;
-							newGameArray[i][j][k] = 1;
-						} else if (!(liveNum === 5) && gameArray[i][j][k] === 1) {
-							newGameArray[i][j][k] = 0;
-						}
-						break;
-					} case "B36/S23": {
-						// B36/S23 (2D Highlife)
-						if ((liveNum === 3 || liveNum === 6) && gameArray[i][j][k] === 0) {
-							changed = true;
-							newGameArray[i][j][k] = 1;
-						} else if (!(liveNum === 2 || liveNum === 3) && gameArray[i][j][k] === 1) {
-							changed = true;
-							newGameArray[i][j][k] = 0;
-						}
-						break;
-					} case "B6/S567": {
-						if (liveNum === 6 && gameArray[i][j][k] === 0) {
-							changed = true;
-							newGameArray[i][j][k] = 1;
-						} else if (!((liveNum > 4) && (liveNum < 8)) && gameArray[i][j][k] === 1) {
-							changed = true;
-							newGameArray[i][j][k] = 0;
-						}
-					}
+				if (rules.birth.includes(liveNum) && gameArray[i][j][k] === 0) {
+					changed = true;
+					newGameArray[i][j][k] = 1;
+				} else if (!(rules.survive.includes(liveNum)) && gameArray[i][j][k] === 1) {
+					changed = true;
+					newGameArray[i][j][k] = 0;
 				}
 			}
 		}
@@ -87,19 +58,24 @@ self.onmessage = function(message) {
 /**
  * The liveCount function takes x, y and z coordinates and checks how many live neighbours that cell has using the
  * checkCell function. Once all of the neighbouring cells have been checked, the accumulated liveNum number value is
- * returned.
+ * returned. If the liveNum value is higher than the rules.max property then break is used to stop checking more
+ * neighbours.
  * @param {number} x - The x coordinate of the current cell
  * @param {number} y - The y coordinate of the current cell
  * @param {number} z - The z coordinate of the current cell
+ * @param {number} max - The maximum number of live neighbours required for birth or survival
  * @returns {number} - The number of live neighbouring cells to the cell at [x][y][z] in the gameArray
  */
-function liveCount(x,y,z) {
+function liveCount(x,y,z,max) {
 	let liveNum = 0;
 	for (let l = -1; l < 2; l++) {
 		for (let m = -1; m < 2; m++) {
 			for (let n = -1; n < 2; n++) {
 				if (!((l === 0) && (m === 0) && (n === 0))) {
 					liveNum += checkCell(x+l, y+m, z+n);
+					if (liveNum > max) {
+						return liveNum;
+					}
 				}
 			}
 		}
