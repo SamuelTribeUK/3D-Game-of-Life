@@ -26,7 +26,7 @@ let timeout = 200;
 let orbitToggle = true;
 let warning = false;
 let orbitCheckbox;
-let hideDead = false;
+let hideDead = true;
 let resizeTimer = false;
 
 let gameBoard;
@@ -50,7 +50,7 @@ let interval;
 const canvas = document.querySelector('canvas');
 
 let scene = new Scene();
-let camera = new PerspectiveCamera(75, (window.innerWidth)/(window.innerHeight), 0.1, 1000);
+let camera = new PerspectiveCamera(45, (window.innerWidth)/(window.innerHeight), 0.1, 1000);
 let renderer = new WebGLRenderer({antialias: true, canvas: canvas});
 let controls;
 let light = new PointLight(0xFFFFFF,1);
@@ -1022,10 +1022,10 @@ function onload() {
 
 	worker.onmessage = onMessage;
 
-	camera.position.z = Math.max(xSize,ySize,zSize) * 1.5;
+	camera.position.z = Math.max(xSize,ySize,zSize) * 2;
 
-	camera.position.x = xSize * 1.5;
-	camera.position.y = ySize * 1.5;
+	camera.position.x = xSize * 2;
+	camera.position.y = ySize * 2;
 
 	controls = new OrbitControls(camera, canvas);
 
@@ -1034,6 +1034,9 @@ function onload() {
 	camera.updateProjectionMatrix();
 	orbitCheckbox = document.getElementById("orbitControls");
 	orbitCheckbox.checked = true;
+	let hideDeadCheckbox = document.getElementById("hideDeadBox");
+	hideDeadCheckbox.checked = true;
+	updateColours();
 	attachClickEvents();
 
 	document.getElementById("stopStart").innerText = "Start";
