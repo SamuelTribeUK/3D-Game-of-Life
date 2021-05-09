@@ -27,7 +27,7 @@ let resizeTimer = false;
 let gameBoard;
 let gameArray;
 
-let worker;
+let firstWorker,secondWorker;
 
 let liveCellColour = "#c24d2c";
 let deadCellColour = "#d9dad7";
@@ -51,33 +51,47 @@ let light = new AmbientLight(0xFFFFFF,1);
  * the board has been checked, if no cells have changed then the game is stopped. The side bar and cube colours are then
  * updated with their respective functions */
 let simulateStep = function() {
-	console.log("simulate step called");
+	//console.log("simulate step called");
 	let changed = false;
 
 	if (window.Worker) {
 
-		worker.postMessage([gameArray,xSize,ySize,zSize]);
+	let firstHalfArray,secondHalfArray;
+	firstHalfArray = new Array((xSize / 2) + 1);
+	secondHalfArray = new Array((xSize / 2) + 1);
+		for (let i = 0; i <= xSize / 2; i++) {
+			firstHalfArray[i] = $.extend(true,[],gameArray[i]);
+			secondHalfArray[i] = $.extend(true,[],gameArray[i + (xSize / 2) - 1]);
+		}
 
-		worker.onmessage = function(e) {
-			console.log("Message received from game.worker.js");
-			gameArray = e.data[0];
-			changed = e.data[1];
+		firstWorker.postMessage([firstHalfArray,xSize / 2,ySize,zSize,0]);
+		secondWorker.postMessage([secondHalfArray,xSize / 2,ySize,zSize,1]);
 
-			iterations += 1;
+		let oneReceived = false;
 
-			if (!changed) {
-				clearInterval(interval);
-				document.getElementById("stopStart").innerText = "Start";
-				status = "stopped";
-				notify("Game has ended","success",10000);
-				updateSidebar();
+		firstWorker.onmessage = function(e) {
+				firstHalfArray = e.data[0];
+				if (e.data[1] === true) {
+					changed = true;
+				}
+				if (oneReceived === true) {
+					receivedCopy(firstHalfArray,secondHalfArray,changed);
+				} else {
+					oneReceived = true;
+				}
+		}
+
+		secondWorker.onmessage = function(e) {
+			secondHalfArray = e.data[0];
+			if (e.data[1] === true) {
+				changed = true;
 			}
-
-			updateSidebar();
-			updateColours();
-
-			if (!(orbitToggle)) requestAnimationFrame(render);
-		};
+			if (oneReceived === true) {
+				receivedCopy(firstHalfArray,secondHalfArray,changed);
+			} else {
+				oneReceived = true;
+			}
+		}
 	} else {
 		let newGameBoard = $.extend(true, [], gameBoard);
 		let newGameArray = $.extend(true, [], gameArray);
@@ -144,6 +158,31 @@ let simulateStep = function() {
 		if (!(orbitToggle)) requestAnimationFrame(render);
 	}
 }
+
+let receivedCopy = function(firstHalfArray,secondHalfArray,changed) {
+
+	for (let i = 0; i < xSize / 2; i++) {
+		gameArray[i] = $.extend(true,[],firstHalfArray[i]);
+		gameArray[i + (xSize / 2)] = $.extend(true,[],secondHalfArray[i]);
+	}
+	gameArray[xSize - 1] = $.extend(true,[],secondHalfArray[(xSize / 2) - 1]);
+	// console.log("gameArray: " + gameArray.toString());
+
+	iterations += 1;
+
+	if (!changed) {
+		clearInterval(interval);
+		document.getElementById("stopStart").innerText = "Start";
+		status = "stopped";
+		notify("Game has ended","success",10000);
+		updateSidebar();
+	}
+
+	updateSidebar();
+	updateColours();
+
+	if (!(orbitToggle)) requestAnimationFrame(render);
+};
 
 /* checkCell takes an x, y and z value and checks the game board if the cell at that location is alive or dead and returns
  * 1 if it is alive and 0 if dead. Out of bound cells are handled by returning 0 */
@@ -454,11 +493,14 @@ let newGameBoard = function(event) {
 
 	gameBoard = null;
 	gameArray = null;
-	if (worker) {
-		worker.terminate();
+	if (firstWorker) {
+		firstWorker.terminate();
+		secondWorker.terminate();
 	}
-	worker = undefined;
-	worker = new Worker();
+	firstWorker = undefined;
+	secondWorker = undefined;
+	firstWorker = new Worker();
+	secondWorker = new Worker();
 	iterations = 0;
 
 	scene = new Scene();
@@ -523,7 +565,8 @@ window.onload = function(){
 	orbitCheckbox = document.getElementById("orbitControls");
 	orbitCheckbox.checked = true;
 	attachClickEvents();
-	worker = new Worker();
+	firstWorker = new Worker();
+	secondWorker = new Worker();
 	interval = setInterval(simulateStep, timeout);
 	document.getElementById("stopStart").innerText = "Stop";
 	status = "playing";
