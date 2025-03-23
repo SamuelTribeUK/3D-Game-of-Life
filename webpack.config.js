@@ -1,10 +1,10 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
 	entry: {
-		app: ['./src/index.js','./src/settingsPanel.js', './src/notification.js'],
+		app: ['./src/index.js', './src/settingsPanel.js', './src/notification.js'],
 	},
 	output: {
 		filename: 'bundle.js',
@@ -22,14 +22,14 @@ module.exports = {
 			},
 			{
 				test: /\.worker\.js$/,
-				use: { loader: "worker-loader"},
+				use: { loader: "worker-loader" },
 			},
 		],
 	},
 	plugins: [
 		new HtmlWebpackPlugin({
 			title: '3D Game of Life - Samuel Tribe',
-			version: '1.8.1',
+			version: '1.9.0',
 			template: path.resolve(__dirname, './src/template.html'),
 			filename: 'index.html',
 			favicon: 'src/assets/images/favicon.ico'

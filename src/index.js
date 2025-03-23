@@ -10,14 +10,15 @@ import {
 	Vector3,
 	WebGLRenderer,
 } from "three";
-import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import './main.css';
 import './settingsPanel.js';
-import {notify} from './notification.js';
+import { notify } from './notification.js';
 import "toastify-js/src/toastify.css";
 import Worker from './game.worker.js';
+import Chart from 'chart.js/auto';
 
-let $ = require('jquery/src/core');
+import extend from './extend.js';
 
 let xSize = 10;
 let ySize = 10;
@@ -28,14 +29,17 @@ let warning = false;
 let orbitCheckbox;
 let hideDead = true;
 let resizeTimer = false;
-
+let alivePercent = [{ iteration: 0, percentage: 0 }];
+let chart;
+let chartShown = true;
+let aliveTotal = 0;
 let gameBoard;
 let gameArray;
 let startingArray;
 let worker;
 let rules = {
 	birth: [3],
-	survive: [2,3],
+	survive: [2, 3],
 	max: 3,
 };
 
@@ -44,16 +48,16 @@ let deadCellColour = "#d9dad7";
 let backgroundColour = "#1a2639";
 
 let iterations = 0;
-let status="stopped";
+let status = "stopped";
 let interval;
 
 const canvas = document.querySelector('canvas');
 
 let scene = new Scene();
-let camera = new PerspectiveCamera(45, (window.innerWidth)/(window.innerHeight), 0.1, 1000);
-let renderer = new WebGLRenderer({antialias: true, canvas: canvas});
+let camera = new PerspectiveCamera(45, (window.innerWidth) / (window.innerHeight), 0.1, 1000);
+let renderer = new WebGLRenderer({ antialias: true, canvas: canvas });
 let controls;
-let light = new PointLight(0xFFFFFF,1);
+let light = new PointLight(0xFFFFFF, 1);
 
 /**
  * The simulateStep function uses the game.worker.js web worker to deep copy the current gameArray and calculate the
@@ -67,10 +71,10 @@ function simulateStep() {
 		if (!worker) {
 			worker = new Worker();
 		}
-		worker.postMessage([gameArray,xSize,ySize,zSize,rules.birth,rules.survive,rules.max]);
+		worker.postMessage([gameArray, xSize, ySize, zSize, rules.birth, rules.survive, rules.max]);
 	} else {
 		console.log("Browser does not support web workers, cannot run");
-		notify("Incompatible browser! please use a modern browser such as Chrome or Firefox","error",10000);
+		notify("Incompatible browser! please use a modern browser such as Chrome or Firefox", "error", 10000);
 		window.alert("Your browser does not support Web Workers which are required by this website, please use modern browser such as Chrome or Firefox");
 	}
 }
@@ -86,11 +90,11 @@ function setupScene() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 
 	let geo = new EdgesGeometry(new BoxGeometry(xSize, ySize, zSize));
-	let mat = new LineBasicMaterial( { color: deadCellColour, linewidth: 2 } );
+	let mat = new LineBasicMaterial({ color: deadCellColour, linewidth: 2 });
 
-	let wireframe = new LineSegments(geo,mat);
+	let wireframe = new LineSegments(geo, mat);
 
-	wireframe.position.set((xSize/2.0) -0.5, (ySize/2.0) -0.5, (zSize/2.0)-0.5);
+	wireframe.position.set((xSize / 2.0) - 0.5, (ySize / 2.0) - 0.5, (zSize / 2.0) - 0.5);
 
 	scene.add(wireframe);
 
@@ -142,7 +146,7 @@ function newBoardFromJSON() {
 		for (let j = 0; j < ySize; j++) {
 			gameBoard[i][j] = new Array(zSize);
 			for (let k = 0; k < zSize; k++) {
-				addMesh(gameArray[i][j][k],i,j,k);
+				addMesh(gameArray[i][j][k], i, j, k);
 			}
 		}
 	}
@@ -164,7 +168,7 @@ function newBoardFromJSON() {
  * @param {number} k - The z coordinate of the cell to be added (also corresponds to the k location in the
  * gameArray[i][j][k] commonly used throughout this project.
  */
-function addMesh(state,i,j,k) {
+function addMesh(state, i, j, k) {
 	let opacity = 1;
 	let colour = liveCellColour;
 	if (state === 0) {
@@ -172,9 +176,9 @@ function addMesh(state,i,j,k) {
 		colour = deadCellColour;
 	}
 	let geometry = new BoxGeometry(0.5, 0.5, 0.5);
-	let material = new MeshLambertMaterial({color: colour, opacity: opacity, transparent: true});
+	let material = new MeshLambertMaterial({ color: colour, opacity: opacity, transparent: true });
 	let mesh = new Mesh(geometry, material);
-	mesh.position.set(i,j,k);
+	mesh.position.set(i, j, k);
 	gameArray[i][j][k] = state;
 	startingArray[i][j][k] = state;
 	gameBoard[i][j][k] = mesh;
@@ -266,41 +270,41 @@ function updateCustomRules() {
 
 		let tempBirth = birthInput.value.split(",");
 		for (const a in tempBirth) {
-			tempBirth[a] = parseInt(tempBirth[a],10);
+			tempBirth[a] = parseInt(tempBirth[a], 10);
 			if (isNaN(tempBirth[a])) {
-				notify("Invalid rule format!","error",3000);
+				notify("Invalid rule format!", "error", 3000);
 				return false;
 			} else if (tempBirth[a] < 0) {
-				notify("Rule values must be positive","error",3000);
+				notify("Rule values must be positive", "error", 3000);
 				return false;
 			}
 		}
 
 		let tempSurvive = surviveInput.value.split(",");
 		for (const a in tempSurvive) {
-			tempSurvive[a] = parseInt(tempSurvive[a],10);
+			tempSurvive[a] = parseInt(tempSurvive[a], 10);
 			if (isNaN(tempSurvive[a])) {
-				notify("Invalid rule format!","error",3000);
+				notify("Invalid rule format!", "error", 3000);
 				return false;
 			} else if (tempSurvive[a] < 0) {
-				notify("Rule values must be positive","error",3000);
+				notify("Rule values must be positive", "error", 3000);
 				return false;
 			}
 		}
 
 		rules.birth = tempBirth;
 		rules.survive = tempSurvive;
-		rules.max = Math.max(...rules.birth,...rules.survive);
+		rules.max = Math.max(...rules.birth, ...rules.survive);
 
 		birthInput.value = rules.birth.toString();
 		surviveInput.value = rules.survive.toString();
 
-		notify("Rules updated","success",3000);
+		notify("Rules updated", "success", 3000);
 
 		let customOption = document.getElementById("presetRules");
-		customOption.options[customOption.length-1].text = "custom";
+		customOption.options[customOption.length - 1].text = "custom";
 	} catch (e) {
-		notify("Rules update failed!","error",3000);
+		notify("Rules update failed!", "error", 3000);
 	}
 }
 
@@ -308,7 +312,7 @@ function updateCustomRules() {
  * The attachClickEvents function adds all of the appropriate functions as eventListeners for the settings Panel. The
  * input fields are populated with the initial values.
  * */
-function attachClickEvents()  {
+function attachClickEvents() {
 	let element = document.getElementById("stopStart");
 	element.addEventListener("click", stopStart);
 
@@ -357,6 +361,8 @@ function attachClickEvents()  {
 	document.getElementById("jsonLoadBtn").onclick = loadJSON;
 
 	window.addEventListener("resize", resizeListener);
+
+	document.getElementById("toggleGraph").onclick = showHideGraph;
 }
 
 /**
@@ -446,7 +452,7 @@ function gameReset() {
 	if (timeInput > 10) {
 		notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
 	}
-	newGameFromJSON(startingArray,timeInput);
+	newGameFromJSON(startingArray, timeInput);
 }
 
 /**
@@ -458,8 +464,16 @@ function endGame() {
 	clearInterval(interval);
 	document.getElementById("stopStart").innerText = "Start";
 	status = "stopped";
-	notify("Game has ended","success",10000);
+	notify("Game has ended", "success", 10000);
 	updateSettingsPanel();
+}
+
+/**
+ * The updatePercentage function takes aliveTotal and calculates the percentage number of alive cells for this iteration. The result is added to the alivePercent js object with 2 arrays: alivePercent.iteration & alivePercent.percentage
+ */
+function updatePercentage() {
+	alivePercent.push({ iteration: iterations, percentage: (aliveTotal / (xSize * ySize * zSize)) * 100 });
+	updateGraph();
 }
 
 /**
@@ -648,7 +662,7 @@ function newGameBoard(event) {
 		notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
 	}
 
-	if ((inputX * inputY * inputZ) > 1000)  {
+	if ((inputX * inputY * inputZ) > 1000) {
 		if (!warning) {
 			notify("WARNING: Large dimensions can use a lot of resources! Click update again if you are sure", "error", 5000);
 			warning = true;
@@ -694,6 +708,10 @@ function newGameBoard(event) {
 		render();
 	}
 	updateColours();
+	chart.destroy();
+	alivePercent = [{ iteration: 0, percentage: 0 }];
+	initAlivePercentage();
+	createGraph();
 }
 
 /**
@@ -703,21 +721,16 @@ function newGameBoard(event) {
  * The code is by stevensanborn on github: https://github.com/mrdoob/three.js/issues/5175
  */
 function doDispose(obj) {
-	if (obj !== null)
-	{
-		for (let i = 0; i < obj.children.length; i++)
-		{
+	if (obj !== null) {
+		for (let i = 0; i < obj.children.length; i++) {
 			doDispose(obj.children[i]);
 		}
-		if (obj.geometry)
-		{
+		if (obj.geometry) {
 			obj.geometry.dispose();
 			obj.geometry = undefined;
 		}
-		if (obj.material)
-		{
-			if (obj.material.map)
-			{
+		if (obj.material) {
+			if (obj.material.map) {
 				obj.material.map.dispose();
 				obj.material.map = undefined;
 			}
@@ -754,18 +767,18 @@ function presetSelect() {
 				dimensionInputs[i].disabled = true;
 			}
 			ruleset.value = "B45/S5";
-			rules.birth = [4,5];
+			rules.birth = [4, 5];
 			rules.survive = [5];
 			rules.max = [5];
 			updateBtn.disabled = true;
 
-			let blinkerArray = [[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
-													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
-													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,1,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
-													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,1,0,0,0],[0,0,1,1,1,0,0],[0,0,0,1,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
-													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,1,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
-													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],
-													[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]]];
+			let blinkerArray = [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]],
+			[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]],
+			[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]],
+			[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0], [0, 0, 1, 1, 1, 0, 0], [0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]],
+			[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]],
+			[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]],
+			[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]];
 
 			let timeInput = document.getElementById("timeoutInput").value;
 
@@ -778,7 +791,7 @@ function presetSelect() {
 				notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
 			}
 
-			newGameFromJSON(blinkerArray,timeInput);
+			newGameFromJSON(blinkerArray, timeInput);
 			break;
 		}
 		case "Accordion Replicator B45/S5": {
@@ -788,21 +801,21 @@ function presetSelect() {
 
 			ruleset.value = "B45/S5";
 
-			rules.birth = [4,5];
+			rules.birth = [4, 5];
 			rules.survive = [5];
 			rules.max = 5;
 
 			updateBtn.disabled = true;
 
-			let accordionArray = [[[0,0,0],[0,0,0],[0,0,0]],
-														[[0,0,0],[0,0,0],[0,0,0]],
-														[[0,0,0],[0,0,0],[0,0,0]],
-														[[0,0,0],[0,0,0],[0,0,0]],
-														[[0,1,0],[1,1,1],[0,1,0]],
-														[[0,0,0],[0,0,0],[0,0,0]],
-														[[0,0,0],[0,0,0],[0,0,0]],
-														[[0,0,0],[0,0,0],[0,0,0]],
-														[[0,0,0],[0,0,0],[0,0,0]]];
+			let accordionArray = [[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+			[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+			[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+			[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+			[[0, 1, 0], [1, 1, 1], [0, 1, 0]],
+			[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+			[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+			[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+			[[0, 0, 0], [0, 0, 0], [0, 0, 0]]];
 
 			let timeInput = document.getElementById("timeoutInput").value;
 
@@ -815,7 +828,7 @@ function presetSelect() {
 				notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
 			}
 
-			newGameFromJSON(accordionArray,timeInput);
+			newGameFromJSON(accordionArray, timeInput);
 			break;
 		} case "Carter Bays Glider B6/S567": {
 			for (let i = 0; i < dimensionInputs.length; i++) {
@@ -825,7 +838,7 @@ function presetSelect() {
 			ruleset.value = "B6/S567";
 
 			rules.birth = [6];
-			rules.survive = [5,6,7];
+			rules.survive = [5, 6, 7];
 			rules.max = 7;
 
 			updateBtn.disabled = true;
@@ -836,7 +849,7 @@ function presetSelect() {
 				gliderArray[i] = new Array(30);
 				for (let j = 0; j < 30; j++) {
 					gliderArray[i][j] = new Array(2);
-					if ((i === 0 && j === 27) || (i === 1) && (j === 27 || j===29) || (i === 2) && (j === 27 || j === 28)) {
+					if ((i === 0 && j === 27) || (i === 1) && (j === 27 || j === 29) || (i === 2) && (j === 27 || j === 28)) {
 						gliderArray[i][j][0] = 1;
 						gliderArray[i][j][1] = 1;
 					} else {
@@ -858,7 +871,7 @@ function presetSelect() {
 				notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
 			}
 
-			newGameFromJSON(gliderArray,timeInput);
+			newGameFromJSON(gliderArray, timeInput);
 			break;
 		}
 	}
@@ -920,7 +933,7 @@ function loadJSON() {
 		}
 
 		if (incorrectFormat) {
-			notify("ERROR: incorrect JSON Array format","error",3000);
+			notify("ERROR: incorrect JSON Array format", "error", 3000);
 			return false;
 		}
 
@@ -935,7 +948,7 @@ function loadJSON() {
 			notify("WARNING: Rates higher than 10 can cause issues!", "error", 5000);
 		}
 
-		newGameFromJSON(parsedInput,timeInput);
+		newGameFromJSON(parsedInput, timeInput);
 
 	} catch (e) {
 		notify("ERROR: incorrect JSON Array format", "error", 3000);
@@ -949,7 +962,7 @@ function loadJSON() {
  * @param {number[][][]} jsonArray - The new gameArray taken from the JSON input textarea
  * @param {number} timeInput - The updated timeInput value from the settings panel
  */
-function newGameFromJSON(jsonArray,timeInput) {
+function newGameFromJSON(jsonArray, timeInput) {
 	doDispose(scene);
 
 	if (status === "playing") {
@@ -958,8 +971,8 @@ function newGameFromJSON(jsonArray,timeInput) {
 
 	gameBoard = undefined;
 	gameArray = undefined;
-	gameArray = $.extend(true, [], jsonArray);
-	startingArray = $.extend(true, [], jsonArray);
+	gameArray = extend(true, [], jsonArray);
+	startingArray = extend(true, [], jsonArray);
 	timeout = 1000 / timeInput;
 	iterations = 0;
 
@@ -985,6 +998,10 @@ function newGameFromJSON(jsonArray,timeInput) {
 		render();
 	}
 	updateColours();
+	chart.destroy();
+	alivePercent = [{ iteration: 0, percentage: 0 }];
+	initAlivePercentage();
+	createGraph();
 }
 
 /**
@@ -994,13 +1011,15 @@ function newGameFromJSON(jsonArray,timeInput) {
  * updateColours functions are called. If orbit controls are disabled then requestAnimationFrame is called to ensure the
  * canvas updates.
  * @param message - the message received from the game.worker.js web worker. message.data[0] contains the new gameArray
- * and message.data[1] is the changed boolean, being false if no changes occurred (meaning the end of the game).
+ * and message.data[1] is the changed boolean, being false if no changes occurred (meaning the end of the game). message.data[2] is the total number of alive cells for this iteration.
  */
 function onMessage(message) {
 	iterations += 1;
 	if (!message.data[1]) endGame();
 
 	gameArray = message.data[0];
+	aliveTotal = message.data[2];
+	updatePercentage();
 	updateSettingsPanel();
 	updateColours();
 
@@ -1016,13 +1035,13 @@ function onMessage(message) {
 function onload() {
 	// If a function is already assigned to window.onload then execute that first, then run code below
 	// This ensures no conflicts with settingsPanel onload function
-	if(typeof(existingOnload) == "function"){ existingOnload(); }
+	if (typeof (existingOnload) == "function") { existingOnload(); }
 	updateSettingsDimensions();
 	worker = new Worker();
 
 	worker.onmessage = onMessage;
 
-	camera.position.z = Math.max(xSize,ySize,zSize) * 2;
+	camera.position.z = Math.max(xSize, ySize, zSize) * 2;
 
 	camera.position.x = xSize * 2;
 	camera.position.y = ySize * 2;
@@ -1042,6 +1061,94 @@ function onload() {
 	document.getElementById("stopStart").innerText = "Start";
 	status = "stopped";
 	updateSettingsPanel();
+	initAlivePercentage();
+	createGraph();
+}
+
+function createGraph() {
+	Chart.defaults.color = "#1a2639";
+	chart = new Chart(
+		document.getElementById('graphPanel'),
+		{
+			type: 'line',
+			data: {
+				labels: alivePercent.map(row => row.iteration),
+				datasets: [
+					{
+						label: '% alive per iteration',
+						data: alivePercent.map(row => row.percentage),
+						borderColor: "#1a2639",
+						backgroundColor: "#1a2639",
+						color: "#b2482e",
+						tension: 0.5,
+						borderWidth: 1,
+						pointRadius: 2,
+					}
+				]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				scaleFontColor: "#1a2639",
+				color: "#1a2639",
+				animation: {
+					duration: 200,
+				},
+				scales: {
+					y: {
+						title: {
+							display: true,
+							text: "Alive %",
+						}
+					},
+					x: {
+						title: {
+							display: true,
+							text: "Iteration",
+						}
+					}
+				}
+			}
+		}
+	);
+	chart.update();
+}
+
+function updateGraph() {
+	chart.data.labels.push(alivePercent[alivePercent.length - 1].iteration);
+	chart.data.datasets.forEach((dataset) => {
+		dataset.data.push(alivePercent[alivePercent.length - 1].percentage);
+	})
+	chart.update();
+}
+
+function initAlivePercentage() {
+	let aliveTotal = 0;
+	for (let i = 0; i < xSize; i++) {
+		for (let j = 0; j < ySize; j++) {
+			for (let k = 0; k < zSize; k++) {
+				if (gameArray[i][j][k] == 1) {
+					aliveTotal++;
+				}
+			}
+		}
+	}
+	alivePercent[0].percentage = (aliveTotal / (xSize * ySize * zSize)) * 100;
+}
+
+function showHideGraph() {
+	let graphArea = document.getElementById("graphWrapper");
+	if (chartShown) {
+		// Hide chart
+		graphArea.style.height = "0px";
+		graphArea.style.visibility = "hidden";
+		chartShown = false;
+	} else {
+		// Show chart
+		graphArea.style.height = "20vw";
+		graphArea.style.visibility = "visible";
+		chartShown = true;
+	}
 }
 
 let existingOnload = window.onload;

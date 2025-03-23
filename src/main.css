@@ -1,246 +1,281 @@
 @font-face {
-    font-family: Cascadia-Code;
-    font-style: normal;
-    font-weight: normal;
-    src: url('./assets/fonts/CascadiaCode.ttf') format('truetype');
+  font-family: Cascadia-Code;
+  font-style: normal;
+  font-weight: normal;
+  src: url("./assets/fonts/CascadiaCode.ttf") format("truetype");
 }
 
 * {
-    font-family: Cascadia-Code, sans-serif;
-    line-height: 1.2;
+  font-family: Cascadia-Code, sans-serif;
+  line-height: 1.2;
 }
 
 body {
-    margin: 0;
-    height: 100vh;
-    background: #1a2639;
-    position: absolute; /* Stay in place */
-    overflow: hidden;
+  margin: 0;
+  height: 100vh;
+  background: #1a2639;
+  position: absolute; /* Stay in place */
+  overflow: hidden;
 }
 
 canvas {
-    z-index: 0;
-    position: absolute; /* Stay in place */
+  z-index: 0;
+  position: absolute; /* Stay in place */
 }
 
 label {
-    color: #f0f0f0;
+  color: #f0f0f0;
 }
 
 h1 {
-    color: #f0f0f0;
-    font-size: 20px;
-    margin-top: 0;
-    margin-bottom: 5px;
-    text-align: center;
+  color: #f0f0f0;
+  font-size: 20px;
+  margin-top: 0;
+  margin-bottom: 5px;
+  text-align: center;
 }
 
 /* The side panel menu */
 .settingsPanel {
-    height: auto;
-    width: 0; /* 0 width - change this with JavaScript */
-    position: absolute; /* Stay in place */
-    z-index: 2; /* Stay on top */
-    top: 10px;
-    left: 10px;
-    background: linear-gradient(to top right, #8A261C, #B2482E);
-    box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    overflow: hidden;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    transition: 0.15s;
+  height: auto;
+  width: 0; /* 0 width - change this with JavaScript */
+  position: absolute; /* Stay in place */
+  z-index: 2; /* Stay on top */
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(to top right, #8a261c, #b2482e);
+  box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  overflow: hidden;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  transition: 0.15s;
 }
 
-.gameInfo p, a {
-    font-size: 14px;
-    color: #f0f0f0;
-    transition: 0.3s;
+.graphWrapper {
+  height: 20vw;
+  width: 98vw;
+  position: absolute;
+  z-index: 2;
+  bottom: 10px;
+  left: 1vw;
+  right: 1vw;
+  background: linear-gradient(to top right, #8a261c, #b2482e);
+  box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  overflow: hidden;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  transition: 0.15s;
+}
+
+.gameInfo p,
+a {
+  font-size: 14px;
+  color: #f0f0f0;
+  transition: 0.3s;
 }
 
 .inputForm .inputLabel {
-    font-size: 15px;
-    height: auto;
-    margin-right: 80px;
-    float: left;
-    display: block;
-    transition: 0.3s;
+  font-size: 15px;
+  height: auto;
+  margin-right: 80px;
+  float: left;
+  display: block;
+  transition: 0.3s;
 }
 .rulesInputLabel {
-    margin-right: 0;
+  margin-right: 0;
 }
 
 .rulesInputField {
-    width: 65px;
-    float: right;
-    display: block;
+  width: 65px;
+  float: right;
+  display: block;
 }
 
 .timeoutInputLabel {
-    margin-right: 85px;
+  margin-right: 85px;
 }
 
-.inputForm input[type="number"], input[type="text"] {
-    display: block;
-    float: right;
-    height: 13px;
-    width: 50px;
+.inputForm input[type="number"],
+input[type="text"] {
+  display: block;
+  float: right;
+  height: 13px;
+  width: 50px;
 }
 
 input[type="text"] {
-    width: 65px;
+  width: 65px;
 }
 
 .birthInputLabel {
-    margin-right: 69px;
+  margin-right: 69px;
 }
 
 .surviveInputLabel {
-    margin-right: 50px;
+  margin-right: 50px;
 }
 
 .updateCustomRulesButton {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .closebtn {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 /* The side panel text */
 .settingsPanel p {
-    margin: 0 0;
+  margin: 0 0;
 }
 
 .settingsPanel .closebtn {
-    position: absolute;
-    top: 0;
-    right: 10px;
-    font-size: 30px;
-    margin-left: 50px;
+  position: absolute;
+  top: 0;
+  right: 10px;
+  font-size: 30px;
+  margin-left: 50px;
 }
 
 .Inputs {
-    display: inline-block;
+  display: inline-block;
 }
 
-.jsonBtn, .jsonTextInput, .jsonLoadBtn, .updateCustomRulesButton {
-    margin-top: 5px;
-    width: 100%;
-    height: auto;
-    border: 0.1em solid #f0f0f0;
-    border-radius: 0.12em;
-    box-sizing: border-box;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.2s;
+.jsonBtn,
+.jsonTextInput,
+.jsonLoadBtn,
+.toggleGraph,
+.updateCustomRulesButton {
+  margin-top: 5px;
+  width: 100%;
+  height: auto;
+  border: 0.1em solid #f0f0f0;
+  border-radius: 0.12em;
+  box-sizing: border-box;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s;
 }
 
-.jsonBtn {
-    font-size: 15px;
+.jsonBtn,
+.toggleGraph {
+  font-size: 15px;
 }
 
 .jsonTextInput {
-    font-size: 8px;
-    visibility: hidden;
+  font-size: 8px;
+  visibility: hidden;
 }
 
 .jsonLoadBtn {
-    margin-top: 0;
-    visibility: hidden;
-    display: none;
+  margin-top: 0;
+  visibility: hidden;
+  display: none;
 }
 
 .openbtn {
-    font-size: 30px;
-    cursor: pointer;
-    background: linear-gradient(to top right, #8A261C, #B2482E);
-    box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    position: absolute; /* Stay in place */
-    z-index: 1; /* Stay on top */
-    color: white;
-    padding: 9px 16px;
-    margin-left: 15px;
-    margin-top: 15px;
-    border: 0;
+  font-size: 30px;
+  cursor: pointer;
+  background: linear-gradient(to top right, #8a261c, #b2482e);
+  box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  position: absolute; /* Stay in place */
+  z-index: 1; /* Stay on top */
+  color: white;
+  padding: 9px 16px;
+  margin-left: 15px;
+  margin-top: 15px;
+  border: 0;
 }
 
 .openbtn:hover {
-    background-color: #444;
+  background-color: #444;
 }
 
-.orbitBoxLabel, .hideDeadBoxLabel {
-    float: left;
+.orbitBoxLabel,
+.hideDeadBoxLabel {
+  float: left;
 }
 
-.orbitBox, .hideDeadBox {
-    float: right;
+.orbitBox,
+.hideDeadBox {
+  float: right;
 }
 
 .updateButton {
-    margin-top: 5px;
-    width: 100%;
-    height: auto;
-    border: 0.1em solid #f0f0f0;
-    border-radius: 0.12em;
-    box-sizing: border-box;
-    font-size: 15px;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.2s;
+  margin-top: 5px;
+  width: 100%;
+  height: auto;
+  border: 0.1em solid #f0f0f0;
+  border-radius: 0.12em;
+  box-sizing: border-box;
+  font-size: 15px;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s;
 }
 
-.stopStart, .step, .reset {
-    font-size: 15px;
-    height: min-content;
-    border: 0.1em solid #f0f0f0;
-    border-radius: 0.12em;
-    box-sizing: border-box;
-    display: inline-block;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.2s;
+.stopStart,
+.step,
+.reset {
+  font-size: 15px;
+  height: min-content;
+  border: 0.1em solid #f0f0f0;
+  border-radius: 0.12em;
+  box-sizing: border-box;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s;
 }
 
-.stopStart:hover, .step:hover, .updateButton:hover, .jsonBtn:hover, .jsonLoadBtn:hover, .reset:hover {
-    border-color: #1a2639;
-    color: #f0f0f0;
-    background-color: #1a2639;
+.stopStart:hover,
+.step:hover,
+.updateButton:hover,
+.jsonBtn:hover,
+.toggleGraph:hover,
+.jsonLoadBtn:hover,
+.reset:hover {
+  border-color: #1a2639;
+  color: #f0f0f0;
+  background-color: #1a2639;
 }
 
-.generalInfo, .generalInfo a {
-    font-size: 13px;
-    color: #f0f0f0;
-    margin-top: 5px;
-    text-align: center;
+.generalInfo,
+.generalInfo a {
+  font-size: 13px;
+  color: #f0f0f0;
+  margin-top: 5px;
+  text-align: center;
 }
 
-.presetsLabel, .rulesLabel {
-    font-size: 13px;
-    height: auto;
-    float: left;
-    display: block;
-    transition: 0.3s;
-    margin-bottom: 4px;
+.presetsLabel,
+.rulesLabel {
+  font-size: 13px;
+  height: auto;
+  float: left;
+  display: block;
+  transition: 0.3s;
+  margin-bottom: 4px;
 }
 
 .rulesLabel {
-    display: block;
+  display: block;
 }
 
 .presets {
-    width: 130px;
-    height: 20px;
-    font-size: 10px;
-    float: right;
+  width: 130px;
+  height: 20px;
+  font-size: 10px;
+  float: right;
 }
 
 .rules {
-    width: 130px;
-    height: 20px;
-    font-size: 11px;
-    float: right;
+  width: 130px;
+  height: 20px;
+  font-size: 11px;
+  float: right;
 }
 
 .toastify {
-    color: #f0f0f0;
+  color: #f0f0f0;
 }
