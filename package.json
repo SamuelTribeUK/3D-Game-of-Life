@@ -10,6 +10,7 @@
     "3d-game-of-life": "file:",
     "chart.js": "^4.4.8",
     "express": "^4.21.2",
+    "node": "^22.9.0",
     "three": "~0.125.2"
   },
   "devDependencies": {
