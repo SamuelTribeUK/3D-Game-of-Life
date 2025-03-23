@@ -16,7 +16,7 @@ import './settingsPanel.js';
 import { notify } from './notification.js';
 import "toastify-js/src/toastify.css";
 import Worker from './game.worker.js';
-import Chart from 'chart.js/auto';
+import { Chart, LineController, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Title, SubTitle, Legend } from 'chart.js';
 
 import extend from './extend.js';
 
@@ -1066,6 +1066,7 @@ function onload() {
 }
 
 function createGraph() {
+	Chart.register(LineController, LineElement, PointElement, CategoryScale, LinearScale);
 	Chart.defaults.color = "#1a2639";
 	chart = new Chart(
 		document.getElementById('graphPanel'),
