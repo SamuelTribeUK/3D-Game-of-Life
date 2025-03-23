@@ -12,7 +12,7 @@
 
 body {
   margin: 0;
-  height: 100vh;
+  height: 100dvh;
   background: #1a2639;
   position: absolute; /* Stay in place */
   overflow: hidden;
@@ -56,14 +56,14 @@ h1 {
   width: 98vw;
   position: absolute;
   z-index: 2;
-  bottom: 1vw;
+  bottom: 1vh;
   left: 1vw;
   right: 1vw;
   background: linear-gradient(to top right, #8a261c, #b2482e);
   box-shadow: 0 4px 8px 6px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   overflow: hidden;
-  padding-top: 1vw;
-  padding-bottom: 1vw;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
   transition: 0.15s;
 }
 

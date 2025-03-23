@@ -1146,7 +1146,7 @@ function showHideGraph() {
 		chartShown = false;
 	} else {
 		// Show chart
-		graphArea.style.height = "20vw";
+		graphArea.style.height = "20vh";
 		graphArea.style.visibility = "visible";
 		chartShown = true;
 	}
