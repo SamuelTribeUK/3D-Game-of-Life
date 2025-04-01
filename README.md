@@ -1,4 +1,4 @@
-# 3D-Game-of-Life version 1.8.1
+# 3D-Game-of-Life version 1.9.0
 
 A Web-Based 3D Implementation of John Conway’s Game of Life Cellular Automaton (Final Year Project)
 
