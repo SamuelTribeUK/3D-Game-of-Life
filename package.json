@@ -1,6 +1,6 @@
 {
   "name": "3d-game-of-life",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/SamuelTribeUK/3D-Game-of-Life.git"
@@ -10,13 +10,13 @@
     "3d-game-of-life": "file:",
     "chart.js": "^4.4.8",
     "express": "^4.21.2",
-    "node": "^22.9.0",
+    "node": "^22.23.0",
     "three": "~0.125.2"
   },
   "devDependencies": {
-    "@babel/preset-env": "~7.13.10",
-    "babel-jest": "^29.7.0",
-    "clean-webpack-plugin": "~3.0.0",
+    "@babel/preset-env": "^7",
+    "babel-jest": "^30.5.0",
+    "clean-webpack-plugin": "~4.0.0",
     "css-loader": "~5.0.1",
     "file-loader": "~6.2.0",
     "html-webpack-plugin": "~5.0.0",
@@ -29,7 +29,7 @@
     "webpack": "^5.98.0",
     "webpack-bundle-analyzer": "~4.4.0",
     "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.0",
+    "webpack-dev-server": "^6.1.0",
     "webpack-merge": "~5.7.3",
     "worker-loader": "~3.0.8",
     "workerloader-jest-transformer": "0.0.3"
